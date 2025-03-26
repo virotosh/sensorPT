@@ -18,7 +18,7 @@ from .SensorTransformer import SensorTransformerEncoder, SensorTransformerPredic
 from .configs import *
 
 #-- use channels for model
-from .commnon import use_channels_names
+from .common import use_channels_names
 
 
 
