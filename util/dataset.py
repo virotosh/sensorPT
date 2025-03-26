@@ -96,7 +96,7 @@ def get_physionet_dataset():
 
     
     if not os.path.exists('../data/io/PhysioNetMI'):
-        src_path = "./data/PhysioNetMI/"
+        src_path = "../data/PhysioNetMI/"
         ls = []
         channels_name = None
         for subject in range(1,110):
