@@ -13,9 +13,9 @@ import copy
 import torchvision
 
 
-from .common import WarmupCosineSchedule, CosineWDSchedule, grad_logger, apply_mask
-from .SensorTransformer import SensorTransformerEncoder, SensorTransformerPredictor, SensorTransformerReconstructor
-from .configs import *
+from common import WarmupCosineSchedule, CosineWDSchedule, grad_logger, apply_mask
+from SensorTransformer import SensorTransformerEncoder, SensorTransformerPredictor, SensorTransformerReconstructor
+from configs import *
 
 #-- use channels for model
 from .commnon import use_channels_names
