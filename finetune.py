@@ -31,7 +31,7 @@ from utils_eval import get_metrics
 
 class LitEEGPTCausal(pl.LightningModule):
 
-    def __init__(self, load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=2-step=774.ckpt"):
+    def __init__(self, load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=8-step=2322.ckpt"):
         super().__init__()    
         self.chans_num = 7
 
