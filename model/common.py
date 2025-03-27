@@ -34,12 +34,12 @@ def InfoNCELoss(pred, target, t=0.):
 
 def BatchMAE_InfoNCELoss(pred, target, t=0.):
     # B, N, D
-    # 对比时空维
+    # Compare space-time dimensions
     pred1    = pred - pred.mean(dim=0)
     target1  = target - target.mean(dim=0)
     loss1, accuracy1 = InfoNCELoss(pred1, target1)
     
-    # 对比Batch维
+    # Compare Batch dimensions
     pred2    = pred.transpose(0,1) # N,B,D
     target2  = target.transpose(0,1) 
     
@@ -49,18 +49,18 @@ def BatchMAE_InfoNCELoss(pred, target, t=0.):
 
 def CoupleInfoNCELoss(pred, target, t=0.):
     
-    # 对比Batch维
+    # Compare Batch dimensions
     pred2    = pred.flatten(1,2).transpose(0,1) # NC,B,D
     target2  = target.flatten(1,2).transpose(0,1) 
     
     loss2, accuracy2 = InfoNCELoss(pred2, target2)
     
-    # 对比时间维
+    # Compare time dimension
     pred1    = pred.transpose(1,2).flatten(0,1)# BC, N, D
     target1  = target.transpose(1,2).flatten(0,1)
     loss1, accuracy1 = InfoNCELoss(pred1, target1)
     
-    # 对比Channel维
+    # Compare Channel dimensions
     pred3    = pred - pred.mean(dim=0)
     pred3    = pred3.flatten(0,1) # BN, C, D
     # pred3    = pred.flatten(0,1).transpose(0,2) # D, C, BN
@@ -96,7 +96,7 @@ def _calculate_similarity(z, c, negatives, temp=0.1):
     c = c.permute([0, 2, 1]).unsqueeze(-2) # b, s, 1, t
     z = z.permute([0, 2, 1]).unsqueeze(-2)
 
-    # negatives不含冲突的损失项
+    # negatives do not contain conflicting loss items
     negative_in_target = (c == negatives).all(dim=-1) | (z == negatives).all(dim=-1)
 
     targets = torch.cat([c, negatives], dim=-2)

@@ -110,7 +110,7 @@ class sensorPT(pl.LightningModule):
             assert x.shape[-1]%N==0 and x.shape[-2]%C == 0
             block_size_c, block_size_n = x.shape[-2]//C, x.shape[-1]//N
             x = x.view(x.shape[0], C, block_size_c, N, block_size_n)
-            # 将维度重新排列以使分块沿着通道轴和空间轴
+            # Rearrange the dimensions so that the blocks are along the channel and spatial axes
             x = x.permute(0, 3, 1, 2, 4).contiguous() # B, N, C, bc, bn
             x = x.view(x.shape[0], C, N, block_size_c * block_size_n)
             y = apply_mask(mask_y.to(x.device), x)
@@ -254,13 +254,12 @@ class sensorPT(pl.LightningModule):
         )
         
 
-#-- modeling
-def seed_torch(seed=1029):
-	random.seed(seed)
-	np.random.seed(seed)
-	torch.manual_seed(seed)
-	torch.cuda.manual_seed(seed)
-	torch.cuda.manual_seed_all(seed) # if you are using multi-GPU.
-	torch.backends.cudnn.benchmark = False
-	torch.backends.cudnn.deterministic = True
+#def seed_torch(seed=1029):
+#	random.seed(seed)
+#	np.random.seed(seed)
+#	torch.manual_seed(seed)
+#	torch.cuda.manual_seed(seed)
+#	torch.cuda.manual_seed_all(seed) # if you are using multi-GPU.
+#	torch.backends.cudnn.benchmark = False
+#	torch.backends.cudnn.deterministic = True
  
