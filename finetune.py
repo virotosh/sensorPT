@@ -32,13 +32,14 @@ class LitSensorPTCausal(pl.LightningModule):
     #def __init__(self, load_path="./logs/EEGPT/checkpoint/eegpt_mcae_58chs_4s_large4E.ckpt"):
     def __init__(self, load_path="./logs/sensor_large.ckpt"):
         super().__init__()    
-        self.chans_num = 7
 
-        use_channels_names = [ 'C5', 'C3', 'C1', 'CZ', 'C2', 'C4', 'C6' ]
+        #use_channels_names = [ 'C5', 'C3', 'C1', 'CZ', 'C2', 'C4', 'C6' ]
+        use_channels_names = [ 'C3', 'CZ', 'C4', ]
+        self.chans_num = len(use_channels_names)
 
         # init model
         target_encoder = SensorTransformerEncoder(
-            img_size=[7, 1024],
+            img_size=[len(use_channels_names), 1024],
             patch_size=32*2,
             embed_num=4,
             embed_dim=512,
