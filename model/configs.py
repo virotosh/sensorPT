@@ -35,7 +35,7 @@ valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size,
 
 steps_per_epoch = math.ceil(len(train_loader)/len(devices))
 
-tag = "tiny1"
+tag = "large"
 variant = "D"
 
 MODELS_CONFIGS = {
