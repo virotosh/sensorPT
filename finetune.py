@@ -11,26 +11,17 @@ import os
 import tqdm
 from pytorch_lightning import loggers as pl_loggers
 import torch.nn.functional as F
-def seed_torch(seed=1029):
-	random.seed(seed)
-	os.environ['PYTHONHASHSEED'] = str(seed)
-	np.random.seed(seed)
-	torch.manual_seed(seed)
-	torch.cuda.manual_seed(seed)
-	torch.cuda.manual_seed_all(seed) # if you are using multi-GPU.
-	torch.backends.cudnn.benchmark = False
-	torch.backends.cudnn.deterministic = True
-seed_torch(7)
-
-from model.SensorTransformer import SensorTransformerEncoder
-from model.module import Conv1dWithConstraint, LinearWithConstraint
 
 from util.utils_eval import get_metrics
 
-class LitSensorPTCausal(pl.LightningModule):
+from model.SensorTransformer import SensorTransformerEncoder
+from model.module import Conv1dWithConstraint, LinearWithConstraint
+from model.common import seed_torch
+seed_torch(7)
 
-    #def __init__(self, load_path="./logs/EEGPT/checkpoint/eegpt_mcae_58chs_4s_large4E.ckpt"):
-    def __init__(self, load_path="./logs/sensor_large.ckpt"):
+class LitSensorPTCausal(pl.LightningModule):
+    
+    def __init__(self, load_path):
         super().__init__()    
 
         #use_channels_names = [ 'C5', 'C3', 'C1', 'CZ', 'C2', 'C4', 'C6' ]
@@ -221,7 +212,7 @@ for i in range(1,2):
     max_lr = 4e-4
 
     # init model
-    model = LitSensorPTCausal()
+    model = LitSensorPTCausal(load_path="./logs/sensor_large.ckpt")
 
     # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
     lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
