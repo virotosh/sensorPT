@@ -25,7 +25,7 @@ seed_torch(7)
 from model.SensorTransformer import SensorTransformerEncoder
 from model.module import Conv1dWithConstraint, LinearWithConstraint
 
-from utils_eval import get_metrics
+from util.utils_eval import get_metrics
 
 class LitSensorPTCausal(pl.LightningModule):
 
