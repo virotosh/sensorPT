@@ -24,14 +24,12 @@ seed_torch(7)
 
 from Modules.models.EEGPT_mcae import EEGTransformer
 
-from Modules.models.EEGPT_mcae import EEGTransformer
-
 from Modules.Network.utils import Conv1dWithConstraint, LinearWithConstraint
 from utils_eval import get_metrics
 
 class LitEEGPTCausal(pl.LightningModule):
 
-    def __init__(self, load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=8-step=2322.ckpt"):
+    def __init__(self, load_path="./logs/eegpt_mcae_58chs_4s_large4E.ckpt"):
         super().__init__()    
         self.chans_num = 7
 
@@ -217,7 +215,7 @@ from util.loadEEG import *
 #print(len(train_dataset[0][0][0]))
 
 
-for i in range(1,10):
+for i in range(1,2):
     all_subjects = [i]
     all_datas = []
     train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = True, target_sample=256*4)
