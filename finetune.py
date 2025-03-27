@@ -55,7 +55,7 @@ class LitEEGPTCausal(pl.LightningModule):
         self.chans_id       = target_encoder.prepare_chan_ids(use_channels_names)
         
         # -- load checkpoint
-        pretrain_ckpt = torch.load(load_path)
+        pretrain_ckpt = torch.load(load_path, weights_only=False)
         
         target_encoder_stat = {}
         for k,v in pretrain_ckpt['state_dict'].items():
