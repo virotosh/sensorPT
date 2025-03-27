@@ -13,7 +13,7 @@ import copy
 import torchvision
 
 
-from .common import WarmupCosineSchedule, CosineWDSchedule, grad_logger, apply_mask
+from .common import WarmupCosineSchedule, CosineWDSchedule, grad_logger, apply_mask, CHANNEL_DICT
 from .SensorTransformer import SensorTransformerEncoder, SensorTransformerPredictor, SensorTransformerReconstructor
 from .configs import *
 
@@ -31,7 +31,7 @@ class sensorPT(pl.LightningModule):
         self.USE_SKIP   = USE_SKIP
         
         encoder = SensorTransformerEncoder(
-            img_size=[58, 256*4],
+            img_size=[len(CHANNEL_DICT), 256*4],
             patch_size=32*2,
             mlp_ratio=4.0,
             drop_rate=0.0,
