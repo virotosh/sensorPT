@@ -11,6 +11,8 @@ import scipy.sparse
 import scipy.signal as signal
 from sklearn.model_selection import train_test_split
 
+import torch
+
 class LoadBCIC_2b:
     '''A class to load the test and train data of the BICI IV 2b datast'''
     def __init__(self,path,subject,tmin =0,tmax = 4,bandpass = None):
