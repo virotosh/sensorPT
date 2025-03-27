@@ -13,7 +13,7 @@ from pytorch_lightning import loggers as pl_loggers
 import torch.nn.functional as F
 def seed_torch(seed=1029):
 	random.seed(seed)
-	os.environ['PYTHONHASHSEED'] = str(seed) # 为了禁止hash随机化，使得实验可复现
+	os.environ['PYTHONHASHSEED'] = str(seed)
 	np.random.seed(seed)
 	torch.manual_seed(seed)
 	torch.cuda.manual_seed(seed)
@@ -22,22 +22,22 @@ def seed_torch(seed=1029):
 	torch.backends.cudnn.deterministic = True
 seed_torch(7)
 
-from Modules.models.EEGPT_mcae import EEGTransformer
+from model.SensorTransformer import SensorTransformerEncoder
+from model.module import Conv1dWithConstraint, LinearWithConstraint
 
-from Modules.Network.utils import Conv1dWithConstraint, LinearWithConstraint
 from utils_eval import get_metrics
 
-class LitEEGPTCausal(pl.LightningModule):
+class LitSensorPTCausal(pl.LightningModule):
 
-    #def __init__(self, load_path="./logs/EEGPT/checkpoint/eegpt_mcae_58chs_4s_large4E.ckpt"):
-    def __init__(self, load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=19-step=5160.ckpt"):
+    def __init__(self, load_path="./logs/EEGPT/checkpoint/eegpt_mcae_58chs_4s_large4E.ckpt"):
+    #def __init__(self, load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=19-step=5160.ckpt"):
         super().__init__()    
         self.chans_num = 7
 
         use_channels_names = [ 'C5', 'C3', 'C1', 'CZ', 'C2', 'C4', 'C6' ]
 
         # init model
-        target_encoder = EEGTransformer(
+        target_encoder = SensorTransformerEncoder(
             img_size=[7, 1024],
             patch_size=32*2,
             embed_num=4,
@@ -78,7 +78,7 @@ class LitEEGPTCausal(pl.LightningModule):
         self.is_sanity=True
         
     def mixup_data(self, x, y, alpha=None):
-        # 随机选择另一个样本来混合数据
+        # Randomly select another sample to mix the data
         
         lam = torch.rand(1).to(x) if alpha is None else alpha
         lam = torch.max(lam, 1 - lam)
@@ -235,7 +235,7 @@ for i in range(1,2):
     max_lr = 4e-4
 
     # init model
-    model = LitEEGPTCausal()
+    model = LitSensorPTCausal()
 
     # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
     lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
