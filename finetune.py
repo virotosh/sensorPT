@@ -23,8 +23,7 @@ class LitSensorPTCausal(pl.LightningModule):
     
     def __init__(self, load_path):
         super().__init__()    
-
-        #use_channels_names = [ 'C5', 'C3', 'C1', 'CZ', 'C2', 'C4', 'C6' ]
+        
         use_channels_names = [ 'C3', 'CZ', 'C4', ]
         self.chans_num = len(use_channels_names)
 
