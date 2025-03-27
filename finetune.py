@@ -29,7 +29,7 @@ from utils_eval import get_metrics
 
 class LitEEGPTCausal(pl.LightningModule):
 
-    def __init__(self, load_path="./logs/eegpt_mcae_58chs_4s_large4E.ckpt"):
+    def __init__(self, load_path="./logs/EEGPT/checkpoint/eegpt_mcae_58chs_4s_large4E.ckpt"):
         super().__init__()    
         self.chans_num = 7
 
