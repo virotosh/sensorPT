@@ -29,8 +29,8 @@ from utils_eval import get_metrics
 
 class LitSensorPTCausal(pl.LightningModule):
 
-    def __init__(self, load_path="./logs/EEGPT/checkpoint/eegpt_mcae_58chs_4s_large4E.ckpt"):
-    #def __init__(self, load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=19-step=5160.ckpt"):
+    #def __init__(self, load_path="./logs/EEGPT/checkpoint/eegpt_mcae_58chs_4s_large4E.ckpt"):
+    def __init__(self, load_path="./logs/sensor_large.ckpt"):
         super().__init__()    
         self.chans_num = 7
 
@@ -56,7 +56,7 @@ class LitSensorPTCausal(pl.LightningModule):
         self.chans_id       = target_encoder.prepare_chan_ids(use_channels_names)
         
         # -- load checkpoint
-        pretrain_ckpt = torch.load(load_path)
+        pretrain_ckpt = torch.load(load_path, weights_only=False)
         
         target_encoder_stat = {}
         for k,v in pretrain_ckpt['state_dict'].items():
