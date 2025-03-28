@@ -12,13 +12,14 @@ from pytorch_lightning import loggers as pl_loggers
 import torch.nn.functional as F
 
 from util.utils_eval import get_metrics
+from util.loadEEG import *
 
 from model.SensorTransformer import SensorTransformerEncoder
 from model.module import Conv1dWithConstraint, LinearWithConstraint
 from model.common import seed_torch
 seed_torch(7)
 
-class LitSensorPTCausal(pl.LightningModule):
+class LitSensorPT(pl.LightningModule):
     
     def __init__(self, load_path):
         super().__init__()    
@@ -185,43 +186,41 @@ class LitSensorPTCausal(pl.LightningModule):
             {'optimizer': optimizer, 'lr_scheduler': lr_dict},
         )
         
-# load data
-data_path = "data/BCIC_2b_0_38HZ/"
 
-from util.loadEEG import *
-
-
-for i in range(1,2):
-    all_subjects = [i]
-    all_datas = []
-    train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = True, target_sample=256*4)
+if __name__=="__main__":
+    # load data
+    data_path = "data/BCIC_2b_0_38HZ/"
+    for i in range(1,2):
+        all_subjects = [i]
+        all_datas = []
+        train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = True, target_sample=256*4)
+        
+        global max_epochs
+        global steps_per_epoch
+        global max_lr
     
-    global max_epochs
-    global steps_per_epoch
-    global max_lr
-
-    batch_size=64
-
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
-    valid_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
+        batch_size=64
     
-    max_epochs = 100
-    steps_per_epoch = math.ceil(len(train_loader) )
-    max_lr = 4e-4
-
-    # init model
-    model = LitSensorPTCausal(load_path="./logs/sensor_large.ckpt")
-
-    # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
-    lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
-    callbacks = [lr_monitor]
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
+        valid_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
+        
+        max_epochs = 100
+        steps_per_epoch = math.ceil(len(train_loader) )
+        max_lr = 4e-4
     
-    trainer = pl.Trainer(accelerator='cuda',
-                         precision=16,
-                         max_epochs=max_epochs, 
-                         callbacks=callbacks,
-                         enable_checkpointing=False,
-                         logger=[pl_loggers.TensorBoardLogger('./logs/', name="EEGPT_BCIC2B_tb", version=f"subject{i}"), 
-                                 pl_loggers.CSVLogger('./logs/', name="EEGPT_BCIC2B_csv")])
-
-    trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
+        # init model
+        model = LitSensorPT(load_path="./logs/epoch=199-step=51600.ckpt")
+    
+        # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
+        lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
+        callbacks = [lr_monitor]
+        
+        trainer = pl.Trainer(accelerator='cuda',
+                             precision=16,
+                             max_epochs=max_epochs, 
+                             callbacks=callbacks,
+                             enable_checkpointing=False,
+                             logger=[pl_loggers.TensorBoardLogger('./logs/', name="EEGPT_BCIC2B_tb", version=f"subject{i}"), 
+                                     pl_loggers.CSVLogger('./logs/', name="EEGPT_BCIC2B_csv")])
+    
+        trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
