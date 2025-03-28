@@ -64,19 +64,6 @@ class LitSensorPT(pl.LightningModule):
         self.loss_fn        = torch.nn.CrossEntropyLoss()
         self.running_scores = {"train":[], "valid":[], "test":[]}
         self.is_sanity=True
-        
-#    def mixup_data(self, x, y, alpha=None):
-#        # Randomly select another sample to mix the data
-#        
-#        lam = torch.rand(1).to(x) if alpha is None else alpha
-#        lam = torch.max(lam, 1 - lam)
-#
-#        batch_size = x.size(0)
-#        index = torch.randperm(batch_size)
-#        mixed_x = lam * x + (1 - lam) * x[index, :]
-#        mixed_y = lam * y + (1 - lam) * y[index]
-#
-#        return mixed_x, mixed_y
     
     def forward(self, x):
         # print(x.shape) # B, C, T
@@ -121,6 +108,7 @@ class LitSensorPT(pl.LightningModule):
     def on_validation_epoch_start(self) -> None:
         self.running_scores["valid"]=[]
         return super().on_validation_epoch_start()
+        
     def on_validation_epoch_end(self) -> None:
         if self.is_sanity:
             self.is_sanity=False
