@@ -1,5 +1,3 @@
-import random 
-import os
 import torch
 import math
 from torch import nn
@@ -7,7 +5,6 @@ import pytorch_lightning as pl
 
 from functools import partial
 import numpy as np
-import tqdm
 from pytorch_lightning import loggers as pl_loggers
 import torch.nn.functional as F
 
@@ -164,7 +161,6 @@ class LitSensorPT(pl.LightningModule):
         return loss
     
     def configure_optimizers(self):
-        
         optimizer = torch.optim.AdamW(
             list(self.chan_conv.parameters())+
             list(self.linear_probe1.parameters())+
