@@ -65,18 +65,18 @@ class LitSensorPT(pl.LightningModule):
         self.running_scores = {"train":[], "valid":[], "test":[]}
         self.is_sanity=True
         
-    def mixup_data(self, x, y, alpha=None):
-        # Randomly select another sample to mix the data
-        
-        lam = torch.rand(1).to(x) if alpha is None else alpha
-        lam = torch.max(lam, 1 - lam)
-
-        batch_size = x.size(0)
-        index = torch.randperm(batch_size)
-        mixed_x = lam * x + (1 - lam) * x[index, :]
-        mixed_y = lam * y + (1 - lam) * y[index]
-
-        return mixed_x, mixed_y
+#    def mixup_data(self, x, y, alpha=None):
+#        # Randomly select another sample to mix the data
+#        
+#        lam = torch.rand(1).to(x) if alpha is None else alpha
+#        lam = torch.max(lam, 1 - lam)
+#
+#        batch_size = x.size(0)
+#        index = torch.randperm(batch_size)
+#        mixed_x = lam * x + (1 - lam) * x[index, :]
+#        mixed_y = lam * y + (1 - lam) * y[index]
+#
+#        return mixed_x, mixed_y
     
     def forward(self, x):
         # print(x.shape) # B, C, T
