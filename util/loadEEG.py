@@ -12,6 +12,7 @@ import scipy.signal as signal
 from sklearn.model_selection import train_test_split
 
 import torch
+from torch.utils.data import Dataset,DataLoader
 
 class LoadBCIC_2b:
     '''A class to load the test and train data of the BICI IV 2b datast'''
@@ -113,7 +114,6 @@ def Load_BCIC_2b_raw_data(data_path, tmin=0, tmax=4,bandpass = [0,38]):
 
 
 
-from torch.utils.data import Dataset,DataLoader
 def get_data(sub,data_path,few_shot_number = 1, is_few_EA = False, target_sample=-1, use_avg=True, use_channels=None):
     
     target_session_1_path = os.path.join(data_path,r'sub{}_train/Data.mat'.format(sub))
