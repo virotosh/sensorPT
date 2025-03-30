@@ -103,10 +103,6 @@ class LitSensorPT(pl.LightningModule):
         self.log('data_std', x.std(), on_epoch=True, on_step=False)
         
         return loss
-        
-    def predict_step(self, batch, batch_idx, dataloader_idx=0):
-        x, y = batch
-        return self(x)
     
     def on_validation_epoch_start(self) -> None:
         self.running_scores["valid"]=[]
