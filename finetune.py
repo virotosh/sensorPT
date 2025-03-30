@@ -213,11 +213,11 @@ if __name__=="__main__":
     
         trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
         
-        _, logit = trainer.predict(model, test_loader)
-        
+        predictions = trainer.predict(model, test_loader)
+        print(predictions)
         #x, logit = model(test_dataset.x[:2])
         
-        print('argmax logit',torch.argmax(logit,  dim=-1))
+        #print('argmax logit',torch.argmax(logit,  dim=-1))
         print('Y:', test_dataset.y)
         
         print('accuracy',accuracy)
