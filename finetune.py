@@ -190,7 +190,6 @@ if __name__=="__main__":
     
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
-        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
         max_epochs = 1
         steps_per_epoch = math.ceil(len(train_loader) )
@@ -212,12 +211,15 @@ if __name__=="__main__":
                                      pl_loggers.CSVLogger('./logs/', name="EEGPT_BCIC2B_csv")])
     
         trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
-
-        x, logit = model(test_dataset.x[:2])
-        y = test_dataset.y[:2]
-        label = F.one_hot(y.long(), num_classes=4).float()
         
-        accuracy = ((torch.argmax(logit, dim=-1)==torch.argmax(label, dim=-1))*1.0).mean()
+        _, logit = trainer.predict(model, test_dataset)
+        
+        #x, logit = model(test_dataset.x[:2])
+        
         print('argmax logit',torch.argmax(logit,  dim=-1))
-        print('Y:', test_dataset.y[:2])
+        print('Y:', test_dataset.y)
+        
+        y = test_dataset.y
+        label = F.one_hot(y.long(), num_classes=4).float()
+        accuracy = ((torch.argmax(logit, dim=-1)==torch.argmax(label, dim=-1))*1.0).mean()
         print('accuracy',accuracy)
