@@ -210,7 +210,7 @@ if __name__=="__main__":
     
         trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
 
-        predictions = model(test_dataset)
+        predictions = model(test_loader)
 
         print(predictions)
         print()
