@@ -9,7 +9,7 @@ from pytorch_lightning import loggers as pl_loggers
 import torch.nn.functional as F
 
 from util.utils_eval import get_metrics
-from util.loadEEG import *
+from util.loadEEG import get_data
 
 from model.SensorTransformer import SensorTransformerEncoder
 from model.module import Conv1dWithConstraint, LinearWithConstraint
@@ -186,9 +186,10 @@ if __name__=="__main__":
         batch_size=64
     
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
-        valid_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
+        valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
+        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 100
+        max_epochs = 1
         steps_per_epoch = math.ceil(len(train_loader) )
         max_lr = 4e-4
     
@@ -208,3 +209,8 @@ if __name__=="__main__":
                                      pl_loggers.CSVLogger('./logs/', name="EEGPT_BCIC2B_csv")])
     
         trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
+
+        predictions = model(test_dataset)
+
+        print(predictions)
+        print()
