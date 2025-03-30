@@ -213,11 +213,11 @@ if __name__=="__main__":
     
         trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
 
-        x, logit = model(test_dataset.x)
-        y = test_dataset.y
+        x, logit = model(test_dataset.x[:2])
+        y = test_dataset.y[:2]
         label = F.one_hot(y.long(), num_classes=4).float()
         
         accuracy = ((torch.argmax(logit, dim=-1)==torch.argmax(label, dim=-1))*1.0).mean()
-        print('argmax logit',torch.argmax(logit,  dim=0))
-        print('X:', test_dataset.x)
+        print('argmax logit',torch.argmax(logit,  dim=-1))
+        print('X:', test_dataset.x[:2])
         print('accuracy',accuracy)
