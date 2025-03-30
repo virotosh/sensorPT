@@ -212,16 +212,14 @@ if __name__=="__main__":
                                      pl_loggers.CSVLogger('./logs/', name="EEGPT_BCIC2B_csv")])
     
         trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
-        
-        #predictions = trainer.predict(model, test_loader)
-        #print(predictions)
-        _, logit = model(test_dataset.x)
-        print('pred Y',torch.argmax(logit,  dim=-1))
 
-        
+        # predict
+        _, logit = model(test_dataset.x)
+        #print('pred Y',torch.argmax(logit,  dim=-1))
+        # accuracy
         y = test_dataset.y
         label = F.one_hot(y.long(), num_classes=4).float()
         accuracy = ((torch.argmax(logit, dim=-1)==torch.argmax(label, dim=-1))*1.0).mean()
         
-        print('Y:', test_dataset.y)
+        #print('Y:', test_dataset.y)
         print('accuracy',accuracy)
