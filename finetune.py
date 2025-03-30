@@ -87,7 +87,7 @@ class LitSensorPT(pl.LightningModule):
         # training_step defined the train loop.
         # It is independent of forward
         x, y = batch
-        y = F.one_hot(y.long(), num_classes=2).float()
+        y = F.one_hot(y.long(), num_classes=4).float()
         
         label = y
         
@@ -215,7 +215,7 @@ if __name__=="__main__":
 
         x, logit = model(test_dataset.x)
         y = test_dataset.y
-        label = F.one_hot(y.long(), num_classes=2).float()
+        label = F.one_hot(y.long(), num_classes=4).float()
         
         accuracy = ((torch.argmax(logit, dim=-1)==torch.argmax(label, dim=-1))*1.0).mean()
         print('logit',logit)
