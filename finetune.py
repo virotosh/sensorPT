@@ -103,10 +103,6 @@ class LitSensorPT(pl.LightningModule):
         self.log('data_std', x.std(), on_epoch=True, on_step=False)
         
         return loss
-        
-    def predict_step(self, batch, batch_idx, dataloader_idx=0):
-        x, y = batch
-        return self(x)
     
     def on_validation_epoch_start(self) -> None:
         self.running_scores["valid"]=[]
@@ -190,7 +186,6 @@ if __name__=="__main__":
     
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
-        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
         max_epochs = 100
         steps_per_epoch = math.ceil(len(train_loader) )
@@ -215,7 +210,7 @@ if __name__=="__main__":
 
         # predict
         _, logit = model(test_dataset.x)
-        #print('pred Y',torch.argmax(logit,  dim=-1))
+        #print('Y hat',torch.argmax(logit,  dim=-1))
         # accuracy
         y = test_dataset.y
         label = F.one_hot(y.long(), num_classes=4).float()
@@ -223,3 +218,5 @@ if __name__=="__main__":
         
         #print('Y:', test_dataset.y)
         print('accuracy',accuracy)
+
+        
