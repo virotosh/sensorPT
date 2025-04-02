@@ -98,14 +98,14 @@ class LitSensorPT(pl.LightningModule):
         
 
         
-        self.linear_probe1   = LinearWithConstraint(2048, 64, max_norm=1)
+        self.linear_probe1   = LinearWithConstraint(2048, 16, max_norm=1)
         self.drop            = torch.nn.Dropout(p=0.50)        
         self.decoder         = torch.nn.TransformerDecoder(
-                                    decoder_layer=torch.nn.TransformerDecoderLayer(64, 4, 64*4, activation=torch.nn.functional.gelu, batch_first=False),
+                                    decoder_layer=torch.nn.TransformerDecoderLayer(16, 4, 16*4, activation=torch.nn.functional.gelu, batch_first=False),
                                     num_layers=4
                                 )
-        self.cls_token =        torch.nn.Parameter(torch.rand(1,1,64)*0.001, requires_grad=True)
-        self.linear_probe2   =   LinearWithConstraint(64, self.num_class, max_norm=0.25)
+        self.cls_token =        torch.nn.Parameter(torch.rand(1,1,16)*0.001, requires_grad=True)
+        self.linear_probe2   =   LinearWithConstraint(16*16, self.num_class, max_norm=0.25)
         
         ###
         
@@ -136,7 +136,7 @@ class LitSensorPT(pl.LightningModule):
         h = z.flatten(2)
         
         h = self.linear_probe1(self.drop(h))
-        pos = create_1d_absolute_sin_cos_embedding(h.shape[1], dim=64)
+        pos = create_1d_absolute_sin_cos_embedding(h.shape[1], dim=16)
         h = h + pos.repeat((h.shape[0], 1, 1)).to(h)
         
         h = torch.cat([self.cls_token.repeat((h.shape[0], 1, 1)).to(h.device), h], dim=1)
@@ -256,7 +256,7 @@ if __name__=="__main__":
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 100
+        max_epochs = 1
         steps_per_epoch = math.ceil(len(train_loader) )
         max_lr = 4e-4
     
