@@ -145,6 +145,7 @@ class LitSensorPT(pl.LightningModule):
         ###
         h = h.flatten(1)
         h = self.linear_probe2(h)
+        print(h.shape())
         
         return x, h
 
