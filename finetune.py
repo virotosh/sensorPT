@@ -141,8 +141,8 @@ class LitSensorPT(pl.LightningModule):
         
         #h = torch.cat([self.cls_token.repeat((h.shape[0], 1, 1)).to(h.device), h], dim=1)
         #h = h.transpose(0,1)
-        h = self.decoder(h, h)[0,:,:]
         h = h.flatten(1)
+        h = self.decoder(h, h)[0,:,:]
         ###
         
         h = self.linear_probe2(h)
