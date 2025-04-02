@@ -118,7 +118,7 @@ class LitSensorPT(pl.LightningModule):
         # print(x.shape) # B, C, T
         B, C, T = x.shape
         z = self.target_encoder(x, self.chans_id.to(x))
-        #x = x/10
+        x = x/10
         #x = self.chan_conv(x)
         #self.target_encoder.eval()
         
@@ -128,18 +128,18 @@ class LitSensorPT(pl.LightningModule):
         
         #h = h.flatten(1)
 
-        x = temporal_interpolation(x, 256*30)
+        #x = temporal_interpolation(x, 256*30)
         x = self.chan_conv(x)
         self.target_encoder.eval()
         
         h = z.flatten(2)
         
         h = self.linear_probe1(self.drop(h))
-        pos = create_1d_absolute_sin_cos_embedding(h.shape[1], dim=64)
-        h = h + pos.repeat((h.shape[0], 1, 1)).to(h)
+        #pos = create_1d_absolute_sin_cos_embedding(h.shape[1], dim=64)
+        #h = h + pos.repeat((h.shape[0], 1, 1)).to(h)
         
-        h = torch.cat([self.cls_token.repeat((h.shape[0], 1, 1)).to(h.device), h], dim=1)
-        h = h.transpose(0,1)
+        #h = torch.cat([self.cls_token.repeat((h.shape[0], 1, 1)).to(h.device), h], dim=1)
+        #h = h.transpose(0,1)
         h = self.decoder(h, h)[0,:,:]
         ###
         
@@ -278,7 +278,7 @@ if __name__=="__main__":
 
         # predict
         _, logit = model(test_dataset.x)
-        print('Y hat',torch.argmax(logit,  dim=-1))
+        #print('Y hat',torch.argmax(logit,  dim=-1))
         # accuracy
         y = test_dataset.y
         label = y.long()

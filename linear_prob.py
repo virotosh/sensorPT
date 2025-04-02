@@ -211,7 +211,7 @@ if __name__=="__main__":
 
         # predict
         _, logit = model(test_dataset.x)
-        print('Y hat',logit)
+        #print('Y hat',torch.argmax(logit,  dim=-1))
         # accuracy
         y = test_dataset.y
         label = y.long()
