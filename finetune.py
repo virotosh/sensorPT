@@ -105,7 +105,7 @@ class LitSensorPT(pl.LightningModule):
                                     num_layers=4
                                 )
         self.cls_token =        torch.nn.Parameter(torch.rand(1,1,16)*0.001, requires_grad=True)
-        self.linear_probe2   =   LinearWithConstraint(16*16*2, self.num_class, max_norm=0.25)
+        self.linear_probe2   =   LinearWithConstraint(64, self.num_class, max_norm=0.25)
         
         ###
         
