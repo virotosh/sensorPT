@@ -59,7 +59,7 @@ class LitSensorPT(pl.LightningModule):
         
         self.linear_probe1   =   LinearWithConstraint(2048, 16, max_norm=1)
         self.linear_probe2   =   LinearWithConstraint(16*16, self.num_class, max_norm=0.25)
-       
+        
         self.drop           = torch.nn.Dropout(p=0.50)
         
         self.loss_fn        = torch.nn.CrossEntropyLoss()
@@ -211,7 +211,7 @@ if __name__=="__main__":
 
         # predict
         _, logit = model(test_dataset.x)
-        #print('Y hat',torch.argmax(logit,  dim=-1))
+        print('Y hat',torch.argmax(logit,  dim=-1))
         # accuracy
         y = test_dataset.y
         label = y.long()
