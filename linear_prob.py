@@ -23,6 +23,7 @@ class LitSensorPT(pl.LightningModule):
         
         use_channels_names = [ 'C3', 'CZ', 'C4', ]
         self.chans_num = len(use_channels_names)
+        self.num_class = 2
 
         # init model
         target_encoder = SensorTransformerEncoder(
@@ -57,7 +58,7 @@ class LitSensorPT(pl.LightningModule):
         self.chan_conv       = Conv1dWithConstraint(3, self.chans_num, 1, max_norm=1)
         
         self.linear_probe1   =   LinearWithConstraint(2048, 16, max_norm=1)
-        self.linear_probe2   =   LinearWithConstraint(16*16, 4, max_norm=0.25)
+        self.linear_probe2   =   LinearWithConstraint(16*16, self.num_class, max_norm=0.25)
        
         self.drop           = torch.nn.Dropout(p=0.50)
         

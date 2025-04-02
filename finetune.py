@@ -33,20 +33,20 @@ def temporal_interpolation(x, desired_sequence_length, mode='nearest', use_avg=T
 def create_1d_absolute_sin_cos_embedding(pos_len, dim):
     assert dim % 2 == 0, "wrong dimension!"
     position_emb = torch.zeros(pos_len, dim, dtype=torch.float)
-    # i矩阵
+    # iMatrix
     i_matrix = torch.arange(dim//2, dtype=torch.float)
     i_matrix /= dim / 2
     i_matrix = torch.pow(10000, i_matrix)
     i_matrix = 1 / i_matrix
     i_matrix = i_matrix.to(torch.long)
-    # pos矩阵
+    # pos matrix
     pos_vec = torch.arange(pos_len).to(torch.long)
-    # 矩阵相乘，pos变成列向量，i_matrix变成行向量
+    # Matrix multiplication, pos becomes a column vector, i_matrix becomes a row vector
     out = pos_vec[:, None] @ i_matrix[None, :]
-    # 奇/偶数列
+    # Odd/even columns
     emb_cos = torch.cos(out)
     emb_sin = torch.sin(out)
-    # 赋值
+    # Assignment
     position_emb[:, 0::2] = emb_sin
     position_emb[:, 1::2] = emb_cos
     return position_emb
@@ -278,11 +278,11 @@ if __name__=="__main__":
 
         # predict
         _, logit = model(test_dataset.x)
-        #print('Y hat',torch.argmax(logit,  dim=-1))
+        print('Y hat',torch.argmax(logit,  dim=-1))
         # accuracy
         y = test_dataset.y
-        label = F.one_hot(y.long(), num_classes=4).float()
-        accuracy = ((torch.argmax(logit, dim=-1)==torch.argmax(label, dim=-1))*1.0).mean()
+        label = y.long()
+        accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
         
         #print('Y:', test_dataset.y)
         print('accuracy',accuracy)
