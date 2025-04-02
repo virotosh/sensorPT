@@ -136,6 +136,8 @@ class LitSensorPT(pl.LightningModule):
         h = z.flatten(2)
         
         h = self.linear_probe1(self.drop(h))
+        
+        h = h.flatten(1)
         pos = create_1d_absolute_sin_cos_embedding(h.shape[1], dim=16)
         h = h + pos.repeat((h.shape[0], 1, 1)).to(h)
         
