@@ -136,7 +136,7 @@ class LitSensorPT(pl.LightningModule):
         h = z.flatten(2)
         
         h = self.linear_probe1(self.drop(h))
-        pos = create_1d_absolute_sin_cos_embedding(h.shape[1], dim=16)
+        pos = create_1d_absolute_sin_cos_embedding(h.shape[1], dim=64)
         h = h + pos.repeat((h.shape[0], 1, 1)).to(h)
         
         h = torch.cat([self.cls_token.repeat((h.shape[0], 1, 1)).to(h.device), h], dim=1)
