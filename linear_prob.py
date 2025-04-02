@@ -87,13 +87,13 @@ class LitSensorPT(pl.LightningModule):
         # training_step defined the train loop.
         # It is independent of forward
         x, y = batch
-        y = F.one_hot(y.long(), num_classes=4).float()
+        y = y.long()
         
         label = y
         
         x, logit = self.forward(x)
         loss = self.loss_fn(logit, label)
-        accuracy = ((torch.argmax(logit, dim=-1)==torch.argmax(label, dim=-1))*1.0).mean()
+        accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
         # Logging to TensorBoard by default
         self.log('train_loss', loss, on_epoch=True, on_step=False)
         self.log('train_acc', accuracy, on_epoch=True, on_step=False)
@@ -213,8 +213,8 @@ if __name__=="__main__":
         #print('Y hat',torch.argmax(logit,  dim=-1))
         # accuracy
         y = test_dataset.y
-        label = F.one_hot(y.long(), num_classes=4).float()
-        accuracy = ((torch.argmax(logit, dim=-1)==torch.argmax(label, dim=-1))*1.0).mean()
+        label = y.long()
+        accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
         
         #print('Y:', test_dataset.y)
         print('accuracy',accuracy)
