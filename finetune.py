@@ -22,7 +22,7 @@ class LitSensorPT(pl.LightningModule):
         super().__init__()    
         
         use_channels_names = [ 'C3', 'CZ', 'C4', ]
-        self.chans_num = len(use_channels_names)self.chans_num = len(use_channels_names)
+        self.chans_num = len(use_channels_names)
         self.num_class = 2
 
         # init model
