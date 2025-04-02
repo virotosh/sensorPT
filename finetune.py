@@ -105,7 +105,7 @@ class LitSensorPT(pl.LightningModule):
                                     num_layers=4
                                 )
         self.cls_token =        torch.nn.Parameter(torch.rand(1,1,16)*0.001, requires_grad=True)
-        self.linear_probe2   =   LinearWithConstraint(16*16, self.num_class, max_norm=0.25)
+        self.linear_probe2   =   LinearWithConstraint(16*16*2, self.num_class, max_norm=0.25)
         
         ###
         
@@ -136,8 +136,6 @@ class LitSensorPT(pl.LightningModule):
         h = z.flatten(2)
         
         h = self.linear_probe1(self.drop(h))
-        
-        h = h.flatten(1)
         pos = create_1d_absolute_sin_cos_embedding(h.shape[1], dim=16)
         h = h + pos.repeat((h.shape[0], 1, 1)).to(h)
         
