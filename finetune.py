@@ -13,43 +13,8 @@ from util.loadEEG import get_data
 
 from model.SensorTransformer import SensorTransformerEncoder
 from model.module import Conv1dWithConstraint, LinearWithConstraint
-from model.common import seed_torch
+from model.common import seed_torch, create_1d_absolute_sin_cos_embedding
 seed_torch(7)
-
-
-def temporal_interpolation(x, desired_sequence_length, mode='nearest', use_avg=True):
-    # print(x.shape)
-    # squeeze and unsqueeze because these are done before batching
-    if use_avg:
-        x = x - torch.mean(x, dim=-2, keepdim=True)
-    if len(x.shape) == 2:
-        return torch.nn.functional.interpolate(x.unsqueeze(0), desired_sequence_length, mode=mode).squeeze(0)
-    # Supports batch dimension
-    elif len(x.shape) == 3:
-        return torch.nn.functional.interpolate(x, desired_sequence_length, mode=mode)
-    else:
-        raise ValueError("TemporalInterpolation only support sequence of single dim channels with optional batch")
-
-def create_1d_absolute_sin_cos_embedding(pos_len, dim):
-    assert dim % 2 == 0, "wrong dimension!"
-    position_emb = torch.zeros(pos_len, dim, dtype=torch.float)
-    # iMatrix
-    i_matrix = torch.arange(dim//2, dtype=torch.float)
-    i_matrix /= dim / 2
-    i_matrix = torch.pow(10000, i_matrix)
-    i_matrix = 1 / i_matrix
-    i_matrix = i_matrix.to(torch.long)
-    # pos matrix
-    pos_vec = torch.arange(pos_len).to(torch.long)
-    # Matrix multiplication, pos becomes a column vector, i_matrix becomes a row vector
-    out = pos_vec[:, None] @ i_matrix[None, :]
-    # Odd/even columns
-    emb_cos = torch.cos(out)
-    emb_sin = torch.sin(out)
-    # Assignment
-    position_emb[:, 0::2] = emb_sin
-    position_emb[:, 1::2] = emb_cos
-    return position_emb
 
 class LitSensorPT(pl.LightningModule):
     
@@ -90,13 +55,6 @@ class LitSensorPT(pl.LightningModule):
         self.target_encoder.load_state_dict(target_encoder_stat)
         
         self.chan_conv       = Conv1dWithConstraint(3, self.chans_num, 1, max_norm=1)
-
-        #self.linear_probe1   =   LinearWithConstraint(2048, 16, max_norm=1)
-        #self.linear_probe2   =   LinearWithConstraint(16*16, 4, max_norm=0.25)
-       
-        #self.drop           = torch.nn.Dropout(p=0.50)
-        
-
         
         self.linear_probe1   = LinearWithConstraint(2048, 64, max_norm=1)
         self.drop            = torch.nn.Dropout(p=0.50)        
@@ -107,7 +65,6 @@ class LitSensorPT(pl.LightningModule):
         self.cls_token =        torch.nn.Parameter(torch.rand(1,1,64)*0.001, requires_grad=True)
         self.linear_probe2   =   LinearWithConstraint(64, self.num_class, max_norm=0.25)
         
-        ###
         self.drop           = torch.nn.Dropout(p=0.50)
         self.loss_fn        = torch.nn.CrossEntropyLoss()
         
@@ -119,17 +76,6 @@ class LitSensorPT(pl.LightningModule):
         B, C, T = x.shape
         z = self.target_encoder(x, self.chans_id.to(x))
         x = x/10
-        #x = self.chan_conv(x)
-        #self.target_encoder.eval()
-        
-        #h = z.flatten(2)
-        
-        #h = self.linear_probe1(self.drop(h))
-        
-        #h = h.flatten(1)
-        
-        ###
-        #x = temporal_interpolation(x, 256*30)
         x = self.chan_conv(x)
         self.target_encoder.eval()
         
@@ -153,14 +99,13 @@ class LitSensorPT(pl.LightningModule):
         # training_step defined the train loop.
         # It is independent of forward
         x, y = batch
-        y = y.long() # F.one_hot(y.long(), num_classes=self.num_class).float()
+        y = y.long()
         
         label = y
         
         x, logit = self.forward(x)
         loss = self.loss_fn(logit, label)
         accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
-        #accuracy = ((torch.argmax(logit, dim=-1)==torch.argmax(label, dim=-1))*1.0).mean() 
         # Logging to TensorBoard by default
         self.log('train_loss', loss, on_epoch=True, on_step=False)
         self.log('train_acc', accuracy, on_epoch=True, on_step=False)
