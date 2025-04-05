@@ -23,7 +23,7 @@ if __name__=="__main__":
     
         # init model
         model = SensorPTService()
-        mode.tuned_model.cuda()
+        model.tuned_model.cuda()
         model.tuned_model.eval()
         
         # predict
