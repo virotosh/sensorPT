@@ -172,7 +172,7 @@ class LitSensorPT(pl.LightningModule):
         
 
     def _initialize_from_ckpt():
-        
+        pass
     
 if __name__=="__main__":
     # load data
