@@ -6,17 +6,18 @@ import torch
 
 if __name__=="__main__":
     # load data
-    data_path = "data/BCIC_2b_0_38HZ/"
+    data_path = "data/BCIC_2b_0_38HZ/"    
+    # init model
+    service = SensorPTService()
+    model = service.tuned_model
+    model.to(torch.device('cpu'))
+    model.eval()
+    
     for i in range(1,2):
         all_subjects = [i]
         all_datas = []
         train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = True, target_sample=256*4)
-    
-        # init model
-        service = SensorPTService()
-        model = service.tuned_model
-        model.to(torch.device('cpu'))
-        model.eval()
+        print(test_dataset.x[:1])
         print('predict')
         # predict
         _, logit = model(test_dataset.x[:1])
