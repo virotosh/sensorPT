@@ -1042,5 +1042,5 @@ if __name__=="__main__":
 
     test_dataset = torch.from_numpy(req)
     _, logit = model(test_dataset)
-    print('Y hat',torch.argmax(logit,  dim=-1))
+    print('Y hat',logit)
     
