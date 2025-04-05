@@ -18,7 +18,7 @@ seed_torch(7)
 
 class LitSensorPT(pl.LightningModule):
     
-    def __init__(self, load_path):
+    def __init__(self):
         super().__init__()    
         
         use_channels_names = [ 'C3', 'CZ', 'C4', ]
@@ -45,6 +45,7 @@ class LitSensorPT(pl.LightningModule):
         self.chans_id       = target_encoder.prepare_chan_ids(use_channels_names)
         
         # -- load checkpoint
+        load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=199-step=51600.ckpt"
         pretrain_ckpt = torch.load(load_path, weights_only=False)
         
         target_encoder_stat = {}
