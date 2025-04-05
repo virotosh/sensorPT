@@ -1,6 +1,7 @@
 from service import SensorPTService
 from linear_prob import LitSensorPT
 from util.loadEEG import get_data
+import torch
 
 
 if __name__=="__main__":
