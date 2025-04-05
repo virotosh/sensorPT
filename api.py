@@ -22,7 +22,7 @@ if __name__=="__main__":
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
     
         # init model
-        model = SensorPTService()
+        model = SensorPTService().tuned_model
 
         # predict
         _, logit = model(test_dataset.x)
