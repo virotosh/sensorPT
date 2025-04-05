@@ -27,10 +27,10 @@ if __name__=="__main__":
         model.tuned_model.eval()
         print('predict')
         # predict
-        _, logit = model.tuned_model(test_dataset.x[:2])
+        _, logit = model.tuned_model(test_dataset.x[:1])
         #print('Y hat',torch.argmax(logit,  dim=-1))
         # accuracy
-        y = test_dataset.y[:2]
+        y = test_dataset.y[:1]
         label = y.long()
         accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
         
