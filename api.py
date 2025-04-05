@@ -2,6 +2,9 @@ from service import SensorPTService
 from linear_prob import LitSensorPT
 from util.loadEEG import get_data
 import torch
+import sys
+import numpy as np
+np.set_printoptions(threshold=sys.maxsize)
 
 
 if __name__=="__main__":
