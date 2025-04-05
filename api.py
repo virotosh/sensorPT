@@ -25,7 +25,7 @@ if __name__=="__main__":
         model = SensorPTService()
         model.tuned_model.to(torch.device('cpu'))
         model.tuned_model.eval()
-        
+        print('predict')
         # predict
         _, logit = model.tuned_model(test_dataset.x)
         #print('Y hat',torch.argmax(logit,  dim=-1))
