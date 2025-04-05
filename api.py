@@ -22,10 +22,10 @@ if __name__=="__main__":
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
     
         # init model
-        model = SensorPTService().tuned_model
+        model = SensorPTService()
 
         # predict
-        _, logit = model(test_dataset.x)
+        _, logit = model.tuned_model(test_dataset.x)
         #print('Y hat',torch.argmax(logit,  dim=-1))
         # accuracy
         y = test_dataset.y

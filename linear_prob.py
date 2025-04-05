@@ -194,7 +194,7 @@ if __name__=="__main__":
         max_lr = 4e-4
     
         # init model
-        model = LitSensorPT(load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=199-step=51600.ckpt")
+        model = LitSensorPT()
     
         # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
         lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
