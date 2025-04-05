@@ -23,7 +23,8 @@ if __name__=="__main__":
     
         # init model
         model = SensorPTService()
-
+        mode.tuned_model.eval()
+        
         # predict
         _, logit = model.tuned_model(test_dataset.x)
         #print('Y hat',torch.argmax(logit,  dim=-1))
