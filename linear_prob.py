@@ -1,3 +1,4 @@
+from pathlib import Path
 import torch
 import math
 from torch import nn
@@ -20,6 +21,7 @@ class LitSensorPT(pl.LightningModule):
     
     def __init__(self, load_path):
         super().__init__()    
+        self.tuned_model = self._initialize_from_ckpt()
         
         use_channels_names = [ 'C3', 'CZ', 'C4', ]
         self.chans_num = len(use_channels_names)
@@ -172,7 +174,11 @@ class LitSensorPT(pl.LightningModule):
         
 
     def _initialize_from_ckpt():
-        pass
+        ckpt_path = './logs/EEGPT_BCIC2B_tb/subject1/checkpoints/epoch=99-step=8200.ckpt'
+        if Path(ckpt_path).is_file():
+            self.tuned_model = LitSensorPT.load_from_checkpoint(ckpt_path)
+        else:
+            self.tuned_model = None
     
 if __name__=="__main__":
     # load data
@@ -197,7 +203,8 @@ if __name__=="__main__":
     
         # init model
         model = LitSensorPT(load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=199-step=51600.ckpt")
-    
+        if model.tuned_model != None:
+            break
         # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
         lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
         callbacks = [lr_monitor]
