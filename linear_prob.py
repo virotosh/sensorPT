@@ -1,4 +1,3 @@
-from pathlib import Path
 import torch
 import math
 from torch import nn
@@ -21,7 +20,6 @@ class LitSensorPT(pl.LightningModule):
     
     def __init__(self, load_path):
         super().__init__()    
-        self.tuned_model = self._initialize_from_ckpt()
         
         use_channels_names = [ 'C3', 'CZ', 'C4', ]
         self.chans_num = len(use_channels_names)
@@ -173,13 +171,6 @@ class LitSensorPT(pl.LightningModule):
         )
         
 
-    def _initialize_from_ckpt(self):
-        ckpt_path = './logs/EEGPT_BCIC2B_tb/subject1/checkpoints/epoch=99-step=8200.ckpt'
-        if Path(ckpt_path).is_file():
-            self.tuned_model = LitSensorPT.load_from_checkpoint(ckpt_path)
-        else:
-            self.tuned_model = None
-    
 if __name__=="__main__":
     # load data
     data_path = "data/BCIC_2b_0_38HZ/"
@@ -203,23 +194,23 @@ if __name__=="__main__":
     
         # init model
         model = LitSensorPT(load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=199-step=51600.ckpt")
-        if model.tuned_model == None:
-            # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
-            lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
-            callbacks = [lr_monitor]
-            
-            trainer = pl.Trainer(accelerator='cuda',
-                                 precision=16,
-                                 max_epochs=max_epochs, 
-                                 callbacks=callbacks,
-                                 enable_checkpointing=True,
-                                 logger=[pl_loggers.TensorBoardLogger('./logs/', name="EEGPT_BCIC2B_tb", version=f"subject{i}"), 
-                                         pl_loggers.CSVLogger('./logs/', name="EEGPT_BCIC2B_csv")])
+    
+        # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
+        lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
+        callbacks = [lr_monitor]
         
-            trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
+        trainer = pl.Trainer(accelerator='cuda',
+                             precision=16,
+                             max_epochs=max_epochs, 
+                             callbacks=callbacks,
+                             enable_checkpointing=False,
+                             logger=[pl_loggers.TensorBoardLogger('./logs/', name="EEGPT_BCIC2B_tb", version=f"subject{i}"), 
+                                     pl_loggers.CSVLogger('./logs/', name="EEGPT_BCIC2B_csv")])
+    
+        trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
 
         # predict
-        _, logit = model.tuned_model(test_dataset.x)
+        _, logit = model(test_dataset.x)
         #print('Y hat',torch.argmax(logit,  dim=-1))
         # accuracy
         y = test_dataset.y
