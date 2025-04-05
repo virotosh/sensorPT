@@ -23,9 +23,8 @@ if __name__=="__main__":
     
         # init model
         model = SensorPTService()
-        #model.tuned_model.to(torch.device('cpu'))
+        model.tuned_model.to(torch.device('cpu'))
         model.tuned_model.eval()
-        test_dataset.to(torch.device('cuda'))
         
         # predict
         _, logit = model.tuned_model(test_dataset.x)
