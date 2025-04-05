@@ -25,6 +25,8 @@ if __name__=="__main__":
         model = SensorPTService()
         model.tuned_model.cuda()
         model.tuned_model.eval()
+        test_dataset.x.cuda()
+        test_dataset.y.cuda()
         
         # predict
         _, logit = model.tuned_model(test_dataset.x)
