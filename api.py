@@ -6,13 +6,12 @@ import numpy as np
 
 
 if __name__=="__main__":
-    # load data
-    data_path = "data/BCIC_2b_0_38HZ/"    
     # init model
     service = SensorPTService()
     model = service.tuned_model
     model.to(torch.device('cpu'))
     model.eval()
+    # load data
     req = np.array([[[-5.38427420e-02, -5.38427420e-02, -5.37892058e-02,
          -5.23898080e-02, -4.72897738e-02, -3.58874314e-02,
          -1.76648349e-02,  3.96387093e-03,  2.23182626e-02,
