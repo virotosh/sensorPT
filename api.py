@@ -1041,5 +1041,5 @@ if __name__=="__main__":
 
     test_dataset = torch.from_numpy(req)
     _, logit = model(test_dataset)
-    print('Y hat',logit.numpy())
+    print('Y hat',logit.detach().numpy())
     
