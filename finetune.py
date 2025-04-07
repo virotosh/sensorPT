@@ -18,12 +18,12 @@ seed_torch(7)
 
 class LitSensorPT(pl.LightningModule):
     
-    def __init__(self, load_path):
+    def __init__(self):
         super().__init__()    
         
         use_channels_names = [ 'C3', 'CZ', 'C4', ]
         self.chans_num = len(use_channels_names)
-        self.num_class = 2
+        self.num_class = 4
 
         # init model
         target_encoder = SensorTransformerEncoder(
@@ -45,7 +45,8 @@ class LitSensorPT(pl.LightningModule):
         self.chans_id       = target_encoder.prepare_chan_ids(use_channels_names)
         
         # -- load checkpoint
-        pretrain_ckpt = torch.load(load_path, weights_only=False)
+        load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=199-step=51600.ckpt"
+        pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cuda"))
         
         target_encoder_stat = {}
         for k,v in pretrain_ckpt['state_dict'].items():

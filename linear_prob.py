@@ -211,10 +211,10 @@ if __name__=="__main__":
         trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
 
         # predict
-        _, logit = model(test_dataset.x)
-        #print('Y hat',torch.argmax(logit,  dim=-1))
+        _, logit = model(test_dataset.x[:1])
+        print('Y hat',torch.argmax(logit,  dim=-1))
         # accuracy
-        y = test_dataset.y
+        y = test_dataset.y[:1]
         label = y.long()
         accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
         
