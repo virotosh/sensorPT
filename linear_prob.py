@@ -204,7 +204,7 @@ if __name__=="__main__":
                              precision=16,
                              max_epochs=max_epochs, 
                              callbacks=callbacks,
-                             enable_checkpointing=False,
+                             enable_checkpointing=True,
                              logger=[pl_loggers.TensorBoardLogger('./logs/', name="EEGPT_BCIC2B_tb", version=f"subject{i}"), 
                                      pl_loggers.CSVLogger('./logs/', name="EEGPT_BCIC2B_csv")])
     
