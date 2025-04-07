@@ -1,4 +1,5 @@
 from pathlib import Path
+import torch
 from linear_prob import LitSensorPT
 
 
