@@ -12,7 +12,6 @@ from sklearn import preprocessing
 app = FastAPI()
 
 # init model
-#print("load tuned model")
 ckpt_path = './logs/EEGPT_BCIC2B_tb/subject1/checkpoints/epoch=99-step=8200.ckpt'
 model = LitSensorPT.load_from_checkpoint(ckpt_path, map_location=torch.device("cpu"))
 model.eval()
