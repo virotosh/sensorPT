@@ -3,6 +3,15 @@ from util.loadEEG import get_data
 import torch
 import numpy as np
 
+import os
+from typing import Dict
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
 
 if __name__=="__main__":
     # init model
@@ -1042,3 +1051,12 @@ if __name__=="__main__":
     _, logit = model(test_dataset)
     print('Y hat',logit.detach().numpy())
     
+    import uvicorn
+
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8003,
+        log_level="info",
+        reload=False,
+    )
