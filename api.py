@@ -4,21 +4,35 @@ import torch
 import numpy as np
 
 import os
-from typing import Dict
-from fastapi import FastAPI
+from typing import Dict, List, Union, Any
+from fastapi import FastAPI, Request
+from sklearn import preprocessing
 
 app = FastAPI()
+
+# init model
+print("load tuned model")
+ckpt_path = './logs/EEGPT_BCIC2B_tb/subject1/checkpoints/epoch=99-step=8200.ckpt'
+model = LitSensorPT.load_from_checkpoint(ckpt_path, map_location=torch.device("cpu"))
+model.eval()
 
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
+    
+@app.post("/predict")
+async def get_body(request: Request):
+    req = request.json()["eeg"]
+    test_dataset = torch.from_numpy(req)
+    _, logit = model(test_dataset)
+    print('Y hat',logit.detach().numpy())
+    probs = logit.detach().numpy()[0]
+    probs_norm = (probs - probs.min()) / (probs - probs.min()).sum()
+    res = dict(zip(["left hand","right hand"], probs_norm))
+    
+    return res
 
 if __name__=="__main__":
-    # init model
-    #print("load tuned model")
-    #ckpt_path = './logs/EEGPT_BCIC2B_tb/subject1/checkpoints/epoch=99-step=8200.ckpt'
-    #model = LitSensorPT.load_from_checkpoint(ckpt_path, map_location=torch.device("cpu"))
-    #model.eval()
     # load data
     req = np.array([[[-5.38427420e-02, -5.38427420e-02, -5.37892058e-02,
          -5.23898080e-02, -4.72897738e-02, -3.58874314e-02,
@@ -1047,9 +1061,10 @@ if __name__=="__main__":
          -6.85902834e-02, -7.46127218e-02, -7.21686333e-02,
          -6.33473247e-02]]], dtype="float32")
 
-    #test_dataset = torch.from_numpy(req)
-    #_, logit = model(test_dataset)
-    #print('Y hat',logit.detach().numpy())
+    
+    test_dataset = torch.from_numpy(req)
+    _, logit = model(test_dataset)
+    print('Y hat',logit.detach().numpy())
     
     import uvicorn
 
