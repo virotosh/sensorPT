@@ -1,4 +1,3 @@
-from service import SensorPTService
 from linear_prob import LitSensorPT
 from util.loadEEG import get_data
 import torch
@@ -10,7 +9,6 @@ if __name__=="__main__":
     print("load tuned model")
     ckpt_path = './logs/EEGPT_BCIC2B_tb/subject1/checkpoints/epoch=99-step=8200.ckpt'
     model = LitSensorPT.load_from_checkpoint(ckpt_path, map_location=torch.device("cpu"))
-    #model.to(torch.device('cpu'))
     model.eval()
     # load data
     req = np.array([[[-5.38427420e-02, -5.38427420e-02, -5.37892058e-02,
