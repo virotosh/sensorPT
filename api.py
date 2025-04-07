@@ -7,9 +7,10 @@ import numpy as np
 
 if __name__=="__main__":
     # init model
-    service = SensorPTService()
-    model = service.tuned_model
-    model.to(torch.device('cpu'))
+    print("load tuned model")
+    ckpt_path = './logs/EEGPT_BCIC2B_tb/subject1/checkpoints/epoch=99-step=8200.ckpt'
+    model = LitSensorPT.load_from_checkpoint(ckpt_path, map_location=torch.device("cpu"))
+    #model.to(torch.device('cpu'))
     model.eval()
     # load data
     req = np.array([[[-5.38427420e-02, -5.38427420e-02, -5.37892058e-02,
