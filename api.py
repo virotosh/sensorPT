@@ -1065,6 +1065,12 @@ if __name__=="__main__":
     test_dataset = torch.from_numpy(req)
     _, logit = model(test_dataset)
     print('Y hat',logit.detach().numpy())
+
+    
+    probs = logit.detach().numpy()[0]
+    probs_norm = (probs - probs.min()) / (probs - probs.min()).sum()
+    res = dict(zip(["left hand","right hand"], probs_norm))
+    print(res)
     
     import uvicorn
 
