@@ -1069,7 +1069,7 @@ if __name__=="__main__":
     
     probs = logit.detach().numpy()[0]
     probs_norm = (probs - probs.min()) / (probs - probs.min()).sum()
-    res = dict(zip(["left hand","right hand",'stress','no stress'], probs_norm))
+    res = dict(zip(["left hand","right hand",'stress'], probs_norm[:-1]))
     print(res)
     
     import uvicorn
