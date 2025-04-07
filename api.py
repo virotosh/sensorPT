@@ -28,7 +28,7 @@ async def get_body(request: Request):
     print('Y hat',logit.detach().numpy())
     probs = logit.detach().numpy()[0]
     probs_norm = (probs - probs.min()) / (probs - probs.min()).sum()
-    res = dict(zip(["left hand","right hand"], probs_norm))
+    res = dict(zip(["left hand","right hand",'stress'], probs_norm[:-1]))
     
     return res
 
