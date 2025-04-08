@@ -21,7 +21,7 @@ def read_root():
     return {"Hello": "World"}
     
 @app.post("/predict")
-async def get_body(request: Request):
+async def get_probs(request: Request):
     _req = await request.json()
     req = np.array(_req["eeg"], dtype="float32")
     test_dataset = torch.from_numpy(req)
