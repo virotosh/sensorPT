@@ -233,7 +233,7 @@ if __name__=="__main__":
     import os
     import tqdm
     
-    for tag in ["PhysioNetMI", "tsu_benchmark"]:#, "seed"]: #, "m3cv"
+    for tag in ["tsu_benchmark"]:#"PhysioNetMI"]:#, "seed"]: #, "m3cv"
         if tag == "PhysioNetMI":
             dataset = get_physionet_dataset()
         elif tag == "tsu_benchmark":
