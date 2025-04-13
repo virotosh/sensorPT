@@ -182,8 +182,8 @@ def get_physionet_dataset():
 
 def get_TSU_dataset():
     dataset = TSUBenckmarkDataset(
-            root_path="./TSUBenchmark/",
-            io_path=data_root_path+'io/tsu_benchmark',
+            root_path="../data/TSUBenchmark/",
+            io_path=data_root_path+'../data/io/tsu_benchmark',
             online_transform=transforms.Compose([
                 transforms.PickElectrode(transforms.PickElectrode.to_index_list(use_channels_names, TSUBENCHMARK_CHANNEL_LIST)),
                 transforms.ToTensor(),
@@ -233,7 +233,7 @@ if __name__=="__main__":
     import os
     import tqdm
     
-    for tag in ["PhysioNetMI"]:#"PhysioNetMI"]:#, "seed"]: #, "m3cv"
+    for tag in ["tsu_benchmark"]:#"PhysioNetMI"]:#, "seed"]: #, "m3cv"
         if tag == "PhysioNetMI":
             dataset = get_physionet_dataset()
         elif tag == "tsu_benchmark":
