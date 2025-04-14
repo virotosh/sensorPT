@@ -29,8 +29,8 @@ devices=[0]
 train_dataset = torchvision.datasets.DatasetFolder(root="./data/merged_ecg/TrainFolder/", loader=load_fn,  extensions=['.edf'])
 valid_dataset = torchvision.datasets.DatasetFolder(root="./data/merged_ecg/ValidFolder/", loader=load_fn, extensions=['.edf'])
 
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=1, shuffle=True)
-valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=1, shuffle=False)
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
+valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
 
 
 steps_per_epoch = math.ceil(len(train_loader)/len(devices))
