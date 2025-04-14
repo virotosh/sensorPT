@@ -44,10 +44,10 @@ if __name__=="__main__":
                         break
 
     ## for finetune 
-    subs = ['Part'+str(ii) for ii in range(51,57)]
-    data = []
-    labels = []
-    for sub in subs:
+    subs = ['Part'+str(ii) for ii in range(51,56)]
+    for sub_id,sub in enumerate(subs):
+        data = []
+        labels = []
         onlyfiles = listdir('../data/CLAS_Database/CLAS/Participants/'+sub+'/all_separate/')
         if not os.path.exists(CLASpath+sub+'_c_i_answers.csv'):
             continue
@@ -65,13 +65,13 @@ if __name__=="__main__":
                             data.append(__tmp)
                             labels.append(1 if row[1]=='correct' else 0)
                         break
-    savemat('../data/ECGtest/sub1_train/Data.mat', {'x_data':data,'y_data':[labels]}, oned_as='row')
+        savemat(f"../data/ECGtest/sub{sub_id}_train/Data.mat", {'x_data':data,'y_data':[labels]}, oned_as='row')
 
     ## for test 
-    subs = ['Part'+str(ii) for ii in range(57,61)]
-    data = []
-    labels = []
-    for sub in subs:
+    subs = ['Part'+str(ii) for ii in range(56,61)]
+    for sub_id,sub in enumerate(subs):
+        data = []
+        labels = []
         onlyfiles = listdir('../data/CLAS_Database/CLAS/Participants/'+sub+'/all_separate/')
         if not os.path.exists(CLASpath+sub+'_c_i_answers.csv'):
             continue
@@ -90,4 +90,4 @@ if __name__=="__main__":
                             labels.append(1 if row[1]=='correct' else 0)
                         break
     
-    savemat('../data/ECGtest/sub1_test/Data.mat', {'x_data':data,'y_data':[labels]}, oned_as='row')
+        savemat(f"../data/ECGtest/sub{sub_id}_test/Data.mat", {'x_data':data,'y_data':[labels]}, oned_as='row')
