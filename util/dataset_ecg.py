@@ -36,7 +36,7 @@ if __name__=="__main__":
                             ecgfiles.append(fn)
                             __tmp = []
                             for iii in range (29):
-                                __tmp+= [list(ecg['ecg1'])[:506]*2,list(ecg['ecg2'])[:506]*2]
+                                __tmp+= [list(ecg['ecg1'])[:512]*2,list(ecg['ecg2'])[:512]*2]
                             data.append(__tmp)
                             _d = torch.from_numpy(np.array(__tmp, dtype='float32') )
                             labels.append(1 if row[1]=='correct' else 0)
@@ -61,7 +61,7 @@ if __name__=="__main__":
                         if(len(list(ecg['ecg2']))>512):
                             __tmp = []
                             for iii in range (29):
-                                __tmp+= [list(ecg['ecg1'])[:506]*2,list(ecg['ecg2'])[:506]*2]
+                                __tmp+= [list(ecg['ecg1'])[:512]*2,list(ecg['ecg2'])[:512]*2]
                             data.append(__tmp)
                             labels.append(1 if row[1]=='correct' else 0)
                         break
@@ -85,7 +85,7 @@ if __name__=="__main__":
                         if(len(list(ecg['ecg2']))>512):
                             __tmp = []
                             for iii in range (29):
-                                __tmp+= [list(ecg['ecg1'])[:506]*2,list(ecg['ecg2'])[:506]*2]
+                                __tmp+= [list(ecg['ecg1'])[:512]*2,list(ecg['ecg2'])[:512]*2]
                             data.append(__tmp)
                             labels.append(1 if row[1]=='correct' else 0)
                         break
