@@ -189,7 +189,9 @@ if __name__=="__main__":
         all_subjects = [i]
         all_datas = []
         train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = True, target_sample=256*4)
+        print(train_dataset.x)
         print(train_dataset.y)
+        print(valid_dataset.x)
         print(valid_dataset.y)
         global max_epochs
         global steps_per_epoch
