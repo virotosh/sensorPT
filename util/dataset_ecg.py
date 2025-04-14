@@ -28,6 +28,7 @@ if __name__=="__main__":
                                 dst+="ValidFolder/0/"
                             else:
                                 dst+="TrainFolder/0/"
+                            os.makedirs(dst, exist_ok=True)
                             #print(len(list(ecg['ecg2'])), fn)
                             ecgfiles.append(fn)
                             data.append([list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500]])
