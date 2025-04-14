@@ -12,7 +12,7 @@ import numpy as np
 #             'P7', 'P5', 'P3', 'P1', 'PZ', 'P2', 'P4', 'P6', 'P8', 
 #                      'PO7', 'PO3', 'POZ',  'PO4', 'PO8', 
 #                               'O1', 'OZ', 'O2', ]
-use_channels_names = [      'ecg1', 'ecg2'      ]
+use_channels_names = [      'ecg1', 'ecg2', 'ecg3', 'ecg4', 'ecg5', 'ecg6', 'ecg7', 'ecg8'      ]
 
 CHANNEL_DICT = {k.upper():v for v,k in enumerate(use_channels_names)}
 
