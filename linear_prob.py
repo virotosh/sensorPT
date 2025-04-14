@@ -177,7 +177,7 @@ if __name__=="__main__":
     # load data
     #data_path = "data/BCIC_2b_0_38HZ/"
     data_path = "data/ECGtest/"
-    for i in range(1,2):
+    for i in range(0,1):
         all_subjects = [i]
         all_datas = []
         train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = True, target_sample=256*4)
