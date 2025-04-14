@@ -186,10 +186,9 @@ def get_data(sub,data_path,few_shot_number = 1, is_few_EA = False, target_sample
             session_2_x = test_data['x_data']
 
         session_2_y = test_data['y_data'].reshape(-1)
-
+        print(session_2_x)
         train_x,valid_x,train_y,valid_y = train_test_split(session_2_x,session_2_y,test_size = 0.1,stratify = session_2_y)
         
-        print(train_x)
         source_train_x.extend(train_x)
         source_train_y.extend(train_y)
         source_train_s.append(torch.ones((len(train_y),))*subject_id)
