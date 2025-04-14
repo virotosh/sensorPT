@@ -32,6 +32,7 @@ valid_dataset = torchvision.datasets.DatasetFolder(root="./data/merged_ecg/Valid
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
 valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
 
+print(len(train_loader), len(valid_loader))
 
 steps_per_epoch = math.ceil(len(train_loader)/len(devices))
 
