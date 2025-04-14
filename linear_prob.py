@@ -189,10 +189,6 @@ if __name__=="__main__":
         all_subjects = [i]
         all_datas = []
         train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = False, target_sample=256*4)
-        print(train_dataset.x)
-        print(train_dataset.y)
-        print(valid_dataset.x)
-        print(valid_dataset.y)
         global max_epochs
         global steps_per_epoch
         global max_lr
@@ -226,10 +222,10 @@ if __name__=="__main__":
         trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
 
         # predict
-        _, logit = model(test_dataset.x[:1])
+        _, logit = model(test_dataset.x)
         print('Y hat',torch.argmax(logit,  dim=-1))
         # accuracy
-        y = test_dataset.y[:1]
+        y = test_dataset.y
         label = y.long()
         accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
         
