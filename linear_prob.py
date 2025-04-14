@@ -45,7 +45,8 @@ class LitSensorPT(pl.LightningModule):
         self.chans_id       = target_encoder.prepare_chan_ids(use_channels_names)
         
         # -- load checkpoint
-        load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=199-step=51600.ckpt"
+        #load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=199-step=51600.ckpt"
+        load_path="./logs/sensorPT_ecg_tb/version_0/checkpoints/epoch=199-step=51600.ckpt"
         pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cpu"))
         
         target_encoder_stat = {}
@@ -174,7 +175,8 @@ class LitSensorPT(pl.LightningModule):
 
 if __name__=="__main__":
     # load data
-    data_path = "data/BCIC_2b_0_38HZ/"
+    #data_path = "data/BCIC_2b_0_38HZ/"
+    data_path = "data/ECGtest/"
     for i in range(1,2):
         all_subjects = [i]
         all_datas = []
@@ -205,8 +207,10 @@ if __name__=="__main__":
                              max_epochs=max_epochs, 
                              callbacks=callbacks,
                              enable_checkpointing=True,
-                             logger=[pl_loggers.TensorBoardLogger('./logs/', name="EEGPT_BCIC2B_tb", version=f"subject{i}"), 
-                                     pl_loggers.CSVLogger('./logs/', name="EEGPT_BCIC2B_csv")])
+                             logger=[pl_loggers.TensorBoardLogger('./logs/', name="ECGtest_tb", version=f"subject{i}"), 
+                                     pl_loggers.CSVLogger('./logs/', name="ECGtest_csv")])
+                             #logger=[pl_loggers.TensorBoardLogger('./logs/', name="EEGPT_BCIC2B_tb", version=f"subject{i}"), 
+                             #        pl_loggers.CSVLogger('./logs/', name="EEGPT_BCIC2B_csv")])
     
         trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
 
