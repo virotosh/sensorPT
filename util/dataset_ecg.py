@@ -103,6 +103,11 @@ if __name__=="__main__":
                                      list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500],
                                      list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], 
                                      list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], 
+                                     list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], 
+                                     list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500],
+                                     list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500],
+                                     list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], 
+                                     list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], 
                                      list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500]  ]
                             data.append(__tmp)
                             labels.append(1 if row[1]=='correct' else 0)
@@ -142,6 +147,16 @@ if __name__=="__main__":
                                      list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], 
                                      list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500],
                                      list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500],
+                                     list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], 
+                                     list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], 
+                                     list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500],
+                                     list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500],
+                                     list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], 
+                                     list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], 
+                                     list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], 
+                                     list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500],
+                                     list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500],
+                                     list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], 
                                      list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], 
                                      list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], 
                                      list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500],
