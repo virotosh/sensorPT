@@ -34,8 +34,9 @@ if __name__=="__main__":
                             os.makedirs(dst, exist_ok=True)
                             #print(len(list(ecg['ecg2'])), fn)
                             ecgfiles.append(fn)
-                            data.append([list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500]])
-                            _d = torch.from_numpy(np.array([list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500]], dtype='float32') )
+                            __tmp = [ list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500],list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500],list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500] ]
+                            data.append(__tmp)
+                            _d = torch.from_numpy(np.array(__tmp, dtype='float32') )
                             labels.append(1 if row[1]=='correct' else 0)
                             torch.save(_d, dst + 'CLAS'+f"_{i}.edf")
                         break
@@ -56,7 +57,8 @@ if __name__=="__main__":
                     if (fn.split('_')[-1].replace('.csv','').lower() == stimulus) and 'ecg' in fn:
                         ecg = pd.read_csv('../data/CLAS_Database/CLAS/Participants/'+sub+'/all_separate/'+fn)
                         if(len(list(ecg['ecg2']))>500):
-                            data.append([list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500]])
+                            __tmp = [ list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500],list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500],list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500] ]
+                            data.append(__tmp)
                             labels.append(1 if row[1]=='correct' else 0)
                         break
     savemat('../data/ECGtest/sub1_train/Data.mat', {'x_data':data,'y_data':[labels]}, oned_as='row')
@@ -77,7 +79,8 @@ if __name__=="__main__":
                     if (fn.split('_')[-1].replace('.csv','').lower() == stimulus) and 'ecg' in fn:
                         ecg = pd.read_csv('../data/CLAS_Database/CLAS/Participants/'+sub+'/all_separate/'+fn)
                         if(len(list(ecg['ecg2']))>500):
-                            data.append([list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500]])
+                            __tmp = [ list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500],list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500],list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500], list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500] ]
+                            data.append(__tmp)
                             labels.append(1 if row[1]=='correct' else 0)
                         break
     
