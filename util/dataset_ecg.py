@@ -6,12 +6,12 @@ import torch
 
 
 if __name__=="__main__":
-    CLASpath = 'data/CLAS_Database/CLAS/Answers/'
+    CLASpath = '../data/CLAS_Database/CLAS/Answers/'
     subs = ['Part'+str(ii) for ii in range(1,51)]
     data = []
     labels = []
     for sub in subs:
-        onlyfiles = listdir('data/CLAS_Database/CLAS/Participants/'+sub+'/all_separate/')
+        onlyfiles = listdir('../data/CLAS_Database/CLAS/Participants/'+sub+'/all_separate/')
         ecgfiles = []
         df = pd.read_csv(CLASpath+sub+'_c_i_answers.csv')
         for ind,row in df.iterrows():
@@ -20,7 +20,7 @@ if __name__=="__main__":
                 
                 for i,fn in enumerate(onlyfiles):
                     if (fn.split('_')[-1].replace('.csv','').lower() == stimulus) and 'ecg' in fn:
-                        ecg = pd.read_csv('data/CLAS_Database/CLAS/Participants/'+sub+'/all_separate/'+fn)
+                        ecg = pd.read_csv('../data/CLAS_Database/CLAS/Participants/'+sub+'/all_separate/'+fn)
                         if(len(list(ecg['ecg2']))>500):
                             dst="../data/merged_ecg/"
                             if random.random()<0.1:
