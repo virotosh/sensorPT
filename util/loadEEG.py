@@ -121,6 +121,7 @@ def get_data(sub,data_path,few_shot_number = 1, is_few_EA = False, target_sample
 
     session_1_data = sio.loadmat(target_session_1_path)
     session_2_data = sio.loadmat(target_session_2_path)
+    print(session_1_data)
     R = None
     if is_few_EA is True:
         session_1_x = EA(session_1_data['x_data'],R)
@@ -160,6 +161,7 @@ def get_data(sub,data_path,few_shot_number = 1, is_few_EA = False, target_sample
             continue
         train_path = os.path.join(data_path,r'sub{}_train/Data.mat'.format(i))
         train_data = sio.loadmat(train_path)
+        print(train_data)
     
         test_path = os.path.join(data_path,r'sub{}_test/Data.mat'.format(i))
         test_data = sio.loadmat(test_path)

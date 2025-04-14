@@ -65,7 +65,6 @@ if __name__=="__main__":
                             data.append(__tmp)
                             labels.append(1 if row[1]=='correct' else 0)
                         break
-        print({'x_data':data,'y_data':[labels]})
         os.makedirs(f"../data/ECGtest/sub{sub_id}_train", exist_ok=True)
         savemat(f"../data/ECGtest/sub{sub_id}_train/Data.mat", {'x_data':data,'y_data':[labels]}, oned_as='row')
 
@@ -91,6 +90,5 @@ if __name__=="__main__":
                             data.append(__tmp)
                             labels.append(1 if row[1]=='correct' else 0)
                         break
-        print({'x_data':data,'y_data':[labels]})
         os.makedirs(f"../data/ECGtest/sub{sub_id}_test", exist_ok=True)
         savemat(f"../data/ECGtest/sub{sub_id}_test/Data.mat", {'x_data':data,'y_data':[labels]}, oned_as='row')
