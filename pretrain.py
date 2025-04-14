@@ -18,6 +18,6 @@ if __name__=="__main__":
     callbacks = [lr_monitor]
     
     trainer = pl.Trainer(strategy='auto', devices=devices, max_epochs=max_epochs, callbacks=callbacks,
-                         logger=[pl_loggers.TensorBoardLogger('./logs/', name=f"sensorPT_{tag}_{variant}_tb"), 
-                                 pl_loggers.CSVLogger('./logs/', name=f"sensorPT_{tag}_{variant}_csv")])
+                         logger=[pl_loggers.TensorBoardLogger('./logs/', name=f"sensorPT_ecg_tb"), 
+                                 pl_loggers.CSVLogger('./logs/', name=f"sensorPT_ecg_csv")])
     trainer.fit(model, train_loader, valid_loader)
