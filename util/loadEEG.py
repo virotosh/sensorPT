@@ -155,7 +155,7 @@ def get_data(sub,data_path,few_shot_number = 1, is_few_EA = False, target_sample
     source_valid_y = []
     source_valid_s = []
     subject_id = 0
-    for i in range(1,10):
+    for i in range(1,2):
         if i == sub:
             continue
         train_path = os.path.join(data_path,r'sub{}_train/Data.mat'.format(i))
