@@ -185,7 +185,7 @@ if __name__=="__main__":
     # load data
     #data_path = "data/BCIC_2b_0_38HZ/"
     data_path = "data/ECGtest/"
-    for i in range(1,2):
+    for i in range(1,6):
         all_subjects = [i]
         all_datas = []
         train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = False, target_sample=256*4)
@@ -226,6 +226,7 @@ if __name__=="__main__":
         print('Y hat',torch.argmax(logit,  dim=-1))
         # accuracy
         y = test_dataset.y
+        print('Y hat',y)
         label = y.long()
         accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
         
