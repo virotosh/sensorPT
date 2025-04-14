@@ -15,6 +15,8 @@ if __name__=="__main__":
     for sub in subs:
         onlyfiles = listdir('../data/CLAS_Database/CLAS/Participants/'+sub+'/all_separate/')
         ecgfiles = []
+        if not os.path.exists(CLASpath+sub+'_c_i_answers.csv'):
+            continue
         df = pd.read_csv(CLASpath+sub+'_c_i_answers.csv')
         for ind,row in df.iterrows():
             if (row[1]!='empty'):
