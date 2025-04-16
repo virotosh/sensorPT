@@ -12,8 +12,7 @@ use_channels_names = [
         'TP7', 'CP5', 'CP3', 'CP1', 'CPZ', 'CP2', 'CP4', 'CP6', 'TP8',
 #             'P7', 'P5', 'P3', 'P1', 'PZ', 'P2', 'P4', 'P6', 'P8', 
 #                      'PO7', 'PO3', 'POZ',  'PO4', 'PO8', 
-#                               'O1', 'OZ', 
-    'O2', 
+                               'O1', 'OZ', #'O2', 
                     ]
 #use_channels_names = [      'ecg1', 'ecg2'      ]
 
