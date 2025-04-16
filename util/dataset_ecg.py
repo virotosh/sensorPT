@@ -8,7 +8,7 @@ from scipy.io import savemat
 
 
 if __name__=="__main__":
-    timewindow = 48
+    timewindow = 64
     CLASpath = '../data/CLAS_Database/CLAS/Answers/'
     subs = ['Part'+str(ii) for ii in range(1,51)]
     data = []
