@@ -60,8 +60,8 @@ class LitSensorPT(pl.LightningModule):
         self.chans_id       = target_encoder.prepare_chan_ids(use_channels_names)
         
         # -- load checkpoint
-        #load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=199-step=51600.ckpt"
-        load_path="./logs/sensorPT_nemo_tb/version_1/checkpoints/epoch=199-step=5600.ckpt"
+        load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=199-step=51600.ckpt"
+        #load_path="./logs/sensorPT_nemo_tb/version_1/checkpoints/epoch=199-step=5600.ckpt"
         pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cpu"))
         
         target_encoder_stat = {}
@@ -101,7 +101,45 @@ class LitSensorPT(pl.LightningModule):
         
         return x, h
         
-    
+    def on_validation_epoch_start(self) -> None:
+        self.running_scores["valid"]=[]
+        return super().on_validation_epoch_start()
+    def on_validation_epoch_end(self) -> None:
+        if self.is_sanity:
+            self.is_sanity=False
+            return super().on_validation_epoch_end()
+            
+        label, y_score = [], []
+        for x,y in self.running_scores["valid"]:
+            label.append(x)
+            y_score.append(y)
+        label = torch.cat(label, dim=0)
+        y_score = torch.cat(y_score, dim=0)
+        print(label.shape, y_score.shape)
+        
+        metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1_weighted", "f1_macro", "f1_micro"]
+        results = get_metrics(y_score.cpu().numpy(), label.cpu().numpy(), metrics, False)
+        
+        for key, value in results.items():
+            self.log('valid_'+key, value, on_epoch=True, on_step=False, sync_dist=True)
+        
+        return super().on_validation_epoch_end()
+    def validation_step(self, batch, batch_idx):
+        # training_step defined the train loop.
+        # It is independent of forward
+        x, y = batch
+        label = y.long()
+        
+        x, logit = self.forward(x)
+        loss = self.loss_fn(logit, label)
+        accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
+        # Logging to TensorBoard by default
+        self.log('valid_loss', loss, on_epoch=True, on_step=False, sync_dist=True)
+        self.log('valid_acc', accuracy, on_epoch=True, on_step=False, sync_dist=True)
+        
+        self.running_scores["valid"].append((label.clone().detach().cpu(), logit.clone().detach().cpu()))
+        
+        return loss
     
     def training_step(self, batch, batch_idx):
         # training_step defined the train loop.
@@ -140,12 +178,12 @@ class LitSensorPT(pl.LightningModule):
         label = torch.cat(label, dim=0)
         y_score = torch.cat(y_score, dim=0)
         print(label.shape, y_score.shape)
-        print(label.shape, y_score.shape)
-        print(label.shape, y_score.shape)
-        print(label.shape, y_score.shape)
+        print(label)
+        print(y_score)
         
-        metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1_weighted", "f1_macro", "f1_micro"]
-        results = get_metrics(y_score.cpu().numpy(), label.cpu().numpy(), metrics, False)#True)
+        #metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1_weighted", "f1_macro", "f1_micro"]
+        metrics = ["accuracy", "balanced_accuracy", "precision", "recall", "cohen_kappa", "f1", "roc_auc"]
+        results = get_metrics(y_score.cpu().numpy(), label.cpu().numpy(), metrics, True)#True)
         
         for key, value in results.items():
             self.log('valid_'+key, value, on_epoch=True, on_step=False, sync_dist=True)
@@ -195,8 +233,8 @@ class LitSensorPT(pl.LightningModule):
 
 if __name__=="__main__":
     # load data
-    #data_path = "data/BCIC_2b_0_38HZ/"
-    data_path = "data/NEMO_exp/"
+    data_path = "data/BCIC_2b_0_38HZ/"
+    #data_path = "data/NEMO_exp/"
     for i in range(1,6):
         all_subjects = [i]
         all_datas = []
@@ -206,6 +244,7 @@ if __name__=="__main__":
         global max_lr
     
         batch_size=64
+    
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
