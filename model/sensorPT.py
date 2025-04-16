@@ -107,7 +107,6 @@ class sensorPT(pl.LightningModule):
             h = self.target_encoder(x, self.chans_id.to(x))
             h = F.layer_norm(h, (h.size(-1),))  # normalize over feature-dim
             C, N = self.encoder.num_patches
-            print(x.shape[-1]%N==0, x.shape[-2]%C == 0, x.shape[-1], N, x.shape[-2],C)
             assert x.shape[-1]%N==0 and x.shape[-2]%C == 0
             block_size_c, block_size_n = x.shape[-2]//C, x.shape[-1]//N
             x = x.view(x.shape[0], C, block_size_c, N, block_size_n)
