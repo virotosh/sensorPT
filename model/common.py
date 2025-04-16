@@ -14,7 +14,7 @@ use_channels_names = [
 #                      'PO7', 'PO3', 'POZ',  'PO4', 'PO8', 
                                'O1', 'OZ', #'O2', 
                     ]
-use_channels_names = [      'ecg1', 'ecg2'      ]
+#use_channels_names = [      'ecg1', 'ecg2'      ]
 
 CHANNEL_DICT = {k.upper():v for v,k in enumerate(use_channels_names)}
 
