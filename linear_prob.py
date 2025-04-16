@@ -38,7 +38,7 @@ class LitSensorPT(pl.LightningModule):
                      'S9_D6 hbo', 'S9_D6 hbr', 'S7_D7 hbo', 'S7_D7 hbr', 'S8_D7 hbo', 'S8_D7 hbr', 'S10_D7 hbo',
                      'S10_D7 hbr', 'S8_D8 hbo', 'S8_D8 hbr', 'S9_D8 hbo', 'S9_D8 hbr', 'S10_D8 hbo', 'S10_D8 hbr']
         self.chans_num = len(use_channels_names)
-        self.num_class = 4
+        self.num_class = 2
 
         # init model
         target_encoder = SensorTransformerEncoder(
@@ -60,8 +60,8 @@ class LitSensorPT(pl.LightningModule):
         self.chans_id       = target_encoder.prepare_chan_ids(use_channels_names)
         
         # -- load checkpoint
-        load_path="./logs/sensor_large_1.ckpt"
-        #load_path="./logs/sensorPT_nemo_tb/version_1/checkpoints/epoch=199-step=5600.ckpt"
+        #load_path="./logs/sensor_large_1.ckpt"
+        load_path="./logs/sensorPT_nemo_tb/version_1/checkpoints/epoch=199-step=5600.ckpt"
         pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cpu"))
         
         target_encoder_stat = {}
@@ -233,8 +233,8 @@ class LitSensorPT(pl.LightningModule):
 
 if __name__=="__main__":
     # load data
-    data_path = "data/BCIC_2b_0_38HZ/"
-    #data_path = "data/NEMO_exp/"
+    #data_path = "data/BCIC_2b_0_38HZ/"
+    data_path = "data/NEMO_exp/"
     for i in range(1,6):
         all_subjects = [i]
         all_datas = []
