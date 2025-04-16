@@ -43,7 +43,7 @@ class LitSensorPT(pl.LightningModule):
         # init model
         target_encoder = SensorTransformerEncoder(
             img_size=[len(use_channels_names), 256*2],
-            patch_size=32,
+            patch_size=64,
             embed_num=4,
             embed_dim=512,
             depth=8,
