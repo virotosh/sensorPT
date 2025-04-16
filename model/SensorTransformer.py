@@ -10,7 +10,7 @@ class SensorTransformerEncoder(nn.Module):
     """ Sensor Transformer """
     def __init__(
         self,
-        img_size=(64,1000),
+        img_size=(31,1000),
         patch_size=64,
         patch_stride=None,
         embed_dim=768,
