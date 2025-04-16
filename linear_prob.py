@@ -202,7 +202,7 @@ if __name__=="__main__":
     
         batch_size=64
         print(len(train_dataset.x))
-        print(len(train_dataset.y))
+        print((train_dataset.y))
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
