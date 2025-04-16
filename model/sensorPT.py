@@ -56,7 +56,7 @@ class sensorPT(pl.LightningModule):
         
         reconstructor = SensorTransformerReconstructor(
             num_patches=encoder.num_patches,
-            patch_size=32*2,
+            patch_size=31,
             mlp_ratio=4.0,
             drop_rate=0.0,
             attn_drop_rate=0.0,
