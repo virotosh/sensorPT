@@ -35,7 +35,7 @@ if __name__=="__main__":
                         #print(len(list(ecg['ecg2'])), fn)
                         ecgfiles.append(fn)
                         __tmp = []
-                        for iii in range (20):
+                        for iii in range (24):
                             __tmp+= [list(ecg['ecg1'])[:timewindow],list(ecg['ecg2'])[:timewindow]]
                         data.append(__tmp)
                         _d = torch.from_numpy(np.array(__tmp, dtype='float32') )
@@ -59,7 +59,7 @@ if __name__=="__main__":
                     ecg = pd.read_csv('../data/CLAS_Database/CLAS/Participants/'+sub+'/all_separate/'+fn)
                     if(len(list(ecg['ecg2']))>timewindow):
                         __tmp = []
-                        for iii in range (20):
+                        for iii in range (24):
                             __tmp+= [list(ecg['ecg1'])[:timewindow],list(ecg['ecg2'])[:timewindow]]
                         data.append(__tmp)
                         labels.append(1 if row[1]=='correct' else 0)
@@ -83,7 +83,7 @@ if __name__=="__main__":
                     ecg = pd.read_csv('../data/CLAS_Database/CLAS/Participants/'+sub+'/all_separate/'+fn)
                     if(len(list(ecg['ecg2']))>timewindow):
                         __tmp = []
-                        for iii in range (20):
+                        for iii in range (24):
                             __tmp+= [list(ecg['ecg1'])[:timewindow],list(ecg['ecg2'])[:timewindow]]
                         data.append(__tmp)
                         labels.append(1 if row[1]=='correct' else 0)
