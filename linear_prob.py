@@ -72,7 +72,7 @@ class LitSensorPT(pl.LightningModule):
                 
         self.target_encoder.load_state_dict(target_encoder_stat)
 
-        self.chan_conv       = Conv1dWithConstraint(58, self.chans_num, 1, max_norm=1)
+        self.chan_conv       = Conv1dWithConstraint(48, self.chans_num, 1, max_norm=1)
         
         self.linear_probe1   =   LinearWithConstraint(2048, 16, max_norm=1)
         self.linear_probe2   =   LinearWithConstraint(16*16, self.num_class, max_norm=0.25)
