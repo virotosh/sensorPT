@@ -6,7 +6,7 @@ import random
 def load_fn(x):
     x = torch.load(x)
     
-    window_length = 4*256  
+    window_length = 2*256  
     data_length = x.shape[1]  
 
     # Calculate the maximum starting index for the windows
