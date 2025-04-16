@@ -203,8 +203,6 @@ def get_metrics(output, target, metrics, is_binary, threshold=0.5):
                 "roc_auc": 0.0,
             }
     else:
-        print(target)
-        print(output)
         results = multiclass_metrics_fn(
             target, output, metrics=metrics
         )
