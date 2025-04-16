@@ -60,7 +60,7 @@ class LitSensorPT(pl.LightningModule):
         self.chans_id       = target_encoder.prepare_chan_ids(use_channels_names)
         
         # -- load checkpoint
-        load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=199-step=51600.ckpt"
+        load_path="./logs/sensor_large_1.ckpt"
         #load_path="./logs/sensorPT_nemo_tb/version_1/checkpoints/epoch=199-step=5600.ckpt"
         pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cpu"))
         
