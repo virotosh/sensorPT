@@ -32,7 +32,7 @@ class sensorPT(pl.LightningModule):
         
         encoder = SensorTransformerEncoder(
             img_size=[len(CHANNEL_DICT), 256*4],
-            patch_size=32*2,
+            patch_size=31,
             mlp_ratio=4.0,
             drop_rate=0.0,
             attn_drop_rate=0.0,

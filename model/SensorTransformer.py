@@ -11,7 +11,7 @@ class SensorTransformerEncoder(nn.Module):
     def __init__(
         self,
         img_size=(64,1000),
-        patch_size=31,
+        patch_size=64,
         patch_stride=None,
         embed_dim=768,
         embed_num=1,
@@ -154,7 +154,7 @@ class SensorTransformerReconstructor(nn.Module):
     def __init__(
         self,
         num_patches,
-        patch_size=31,
+        patch_size=64,
         embed_num=1,
         use_pos_embed = False,
         use_inp_embed = True,
