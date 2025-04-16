@@ -21,7 +21,7 @@ def load_fn(x):
 
 max_epochs = 200
 max_lr = 5e-4
-batch_size=31
+batch_size=64
 devices=[0]
 
 
