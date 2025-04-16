@@ -31,8 +31,8 @@ class sensorPT(pl.LightningModule):
         self.USE_SKIP   = USE_SKIP
         
         encoder = SensorTransformerEncoder(
-            img_size=[len(CHANNEL_DICT), 500 ],#256*4],
-            patch_size=31,
+            img_size=[len(CHANNEL_DICT), 256*2 ],#256*4],
+            patch_size=32,
             mlp_ratio=4.0,
             drop_rate=0.0,
             attn_drop_rate=0.0,
@@ -56,7 +56,7 @@ class sensorPT(pl.LightningModule):
         
         reconstructor = SensorTransformerReconstructor(
             num_patches=encoder.num_patches,
-            patch_size=31,
+            patch_size=32,
             mlp_ratio=4.0,
             drop_rate=0.0,
             attn_drop_rate=0.0,

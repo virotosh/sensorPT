@@ -24,7 +24,7 @@ if __name__=="__main__":
             for i,fn in enumerate(onlyfiles):
                 if (fn.split('_')[-1].replace('.csv','').lower() == stimulus) and 'ecg' in fn:
                     ecg = pd.read_csv('../data/CLAS_Database/CLAS/Participants/'+sub+'/all_separate/'+fn)
-                    if(len(list(ecg['ecg2']))>500):
+                    if(len(list(ecg['ecg2']))>512):
                         dst="../data/merged_ecg/"
                         if random.random()<0.1:
                             dst+="ValidFolder/0/"
@@ -35,7 +35,7 @@ if __name__=="__main__":
                         ecgfiles.append(fn)
                         __tmp = []
                         for iii in range (29):
-                            __tmp+= [list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500]]
+                            __tmp+= [list(ecg['ecg1'])[:512],list(ecg['ecg2'])[:512]]
                         data.append(__tmp)
                         _d = torch.from_numpy(np.array(__tmp, dtype='float32') )
                         labels.append(1 if row[1]=='correct' else 0)
@@ -56,10 +56,10 @@ if __name__=="__main__":
             for i,fn in enumerate(onlyfiles):
                 if (fn.split('_')[-1].replace('.csv','').lower() == stimulus) and 'ecg' in fn:
                     ecg = pd.read_csv('../data/CLAS_Database/CLAS/Participants/'+sub+'/all_separate/'+fn)
-                    if(len(list(ecg['ecg2']))>500):
+                    if(len(list(ecg['ecg2']))>512):
                         __tmp = []
                         for iii in range (29):
-                            __tmp+= [list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500]]
+                            __tmp+= [list(ecg['ecg1'])[:512],list(ecg['ecg2'])[:512]]
                         data.append(__tmp)
                         labels.append(1 if row[1]=='correct' else 0)
                     break
@@ -80,10 +80,10 @@ if __name__=="__main__":
             for i,fn in enumerate(onlyfiles):
                 if (fn.split('_')[-1].replace('.csv','').lower() == stimulus) and 'ecg' in fn:
                     ecg = pd.read_csv('../data/CLAS_Database/CLAS/Participants/'+sub+'/all_separate/'+fn)
-                    if(len(list(ecg['ecg2']))>500):
+                    if(len(list(ecg['ecg2']))>512):
                         __tmp = []
                         for iii in range (29):
-                            __tmp+= [list(ecg['ecg1'])[:500],list(ecg['ecg2'])[:500]]
+                            __tmp+= [list(ecg['ecg1'])[:512],list(ecg['ecg2'])[:512]]
                         data.append(__tmp)
                         labels.append(1 if row[1]=='correct' else 0)
                     break
