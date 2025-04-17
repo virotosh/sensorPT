@@ -151,14 +151,14 @@ def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_s
         source_valid_x = temporal_interpolation(source_valid_x, target_sample, use_avg=use_avg)
         
     if use_channels is not None:
-        train_dataset = eeg_dataset(source_train_x[:,use_channels,:],source_train_y,source_train_s)
+        train_dataset = eeg_dataset(source_train_x[:,use_channels,:],source_train_y)
     else:
-        train_dataset = eeg_dataset(source_train_x,source_train_y,source_train_s)
+        train_dataset = eeg_dataset(source_train_x,source_train_y)
     
     if use_channels is not None:
-        valid_datset = eeg_dataset(source_valid_x[:,use_channels,:],source_valid_y,source_valid_s)
+        valid_datset = eeg_dataset(source_valid_x[:,use_channels,:],source_valid_y)
     else:
-        valid_datset = eeg_dataset(source_valid_x,source_valid_y,source_valid_s)
+        valid_datset = eeg_dataset(source_valid_x,source_valid_y)
     
     return train_dataset,valid_datset,test_dataset
     
