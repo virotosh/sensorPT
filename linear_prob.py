@@ -182,7 +182,7 @@ class LitSensorPT(pl.LightningModule):
         #print(y_score)
         
         #metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1_weighted", "f1_macro", "f1_micro"]
-        metrics = ["accuracy", "balanced_accuracy", "precision", "recall", "cohen_kappa", "f1", "roc_auc"]
+        metrics = ["accuracy", "balanced_accuracy", "recall", "cohen_kappa", "f1", "roc_auc"] #"precision", 
         results = get_metrics(y_score.cpu().numpy(), label.cpu().numpy(), metrics, True)#True)
         
         for key, value in results.items():
