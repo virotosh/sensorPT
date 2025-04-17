@@ -122,7 +122,7 @@ def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_s
     if use_channels is not None:
         test_dataset = eeg_dataset(test_x_1[:,use_channels,:],test_y_1)
     else:
-        test_dataset = eeg_dataset(test_x_1,test_y_2)
+        test_dataset = eeg_dataset(test_x_1,test_y_1)
         
     source_train_x = []
     source_train_y = []
