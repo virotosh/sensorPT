@@ -252,7 +252,7 @@ if __name__=="__main__":
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 100
+        max_epochs = 10
         steps_per_epoch = math.ceil(len(train_loader) )
         max_lr = 4e-4
     
@@ -268,8 +268,8 @@ if __name__=="__main__":
                              max_epochs=max_epochs, 
                              callbacks=callbacks,
                              enable_checkpointing=True,
-                             logger=[pl_loggers.TensorBoardLogger('./logs/', name="NEMOtest_tb", version=f"subject{i}"), 
-                                     pl_loggers.CSVLogger('./logs/', name="NEMOtest_csv")])
+                             logger=[pl_loggers.TensorBoardLogger('./logs/', name="IMWUTtest_tb", version=f"subject{i}"), 
+                                     pl_loggers.CSVLogger('./logs/', name="IMWUTtest_csv")])
                              #logger=[pl_loggers.TensorBoardLogger('./logs/', name="EEGPT_BCIC2B_tb", version=f"subject{i}"), 
                              #        pl_loggers.CSVLogger('./logs/', name="EEGPT_BCIC2B_csv")])
     
