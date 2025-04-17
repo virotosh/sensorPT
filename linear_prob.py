@@ -42,7 +42,7 @@ class LitSensorPT(pl.LightningModule):
 
         # init model
         target_encoder = SensorTransformerEncoder(
-            img_size=[len(use_channels_names), 256*4],
+            img_size=[len(use_channels_names), 256*2],
             patch_size=64,
             embed_num=4,
             embed_dim=512,
@@ -238,7 +238,7 @@ if __name__=="__main__":
     for i in range(1,6):
         all_subjects = [i]
         all_datas = []
-        train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = False, target_sample=256*4)
+        train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = False, target_sample=256*2)
         global max_epochs
         global steps_per_epoch
         global max_lr
