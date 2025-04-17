@@ -236,7 +236,8 @@ if __name__=="__main__":
     #data_path = "data/BCIC_2b_0_38HZ/"
     #data_path = "data/NEMO_exp/"
     data_path = "data/IMWUT_exp/"
-    for i in range(1,6):
+    acc = []
+    for i in range(1,73):
         all_subjects = [i]
         all_datas = []
         #train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = False, target_sample=256*2)
@@ -284,5 +285,7 @@ if __name__=="__main__":
         
         #print('Y:', test_dataset.y)
         print('accuracy',accuracy)
+        acc.append(accuracy)
+    print('AVERAGE accuracy',np.mean(np.array(acc)))
 
         
