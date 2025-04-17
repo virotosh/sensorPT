@@ -74,8 +74,8 @@ class LitSensorPT(pl.LightningModule):
 
         self.chan_conv       = Conv1dWithConstraint(self.chans_num, self.chans_num, 1, max_norm=1)
         
-        self.linear_probe1   =   LinearWithConstraint(1024, 16, max_norm=1)
-        self.linear_probe2   =   LinearWithConstraint(16*16, self.num_class, max_norm=0.25)
+        self.linear_probe1   =   LinearWithConstraint(2048, 8, max_norm=1)
+        self.linear_probe2   =   LinearWithConstraint(8*8, self.num_class, max_norm=0.25)
         
         self.drop           = torch.nn.Dropout(p=0.50)
         
