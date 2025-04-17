@@ -234,11 +234,13 @@ class LitSensorPT(pl.LightningModule):
 if __name__=="__main__":
     # load data
     #data_path = "data/BCIC_2b_0_38HZ/"
-    data_path = "data/NEMO_exp/"
+    #data_path = "data/NEMO_exp/"
+    data_path = "data/IMWUT_exp/"
     for i in range(1,6):
         all_subjects = [i]
         all_datas = []
-        train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = False, target_sample=256*2)
+        #train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = False, target_sample=256*2)
+        train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,1, is_few_EA = False, target_sample=256*2)
         global max_epochs
         global steps_per_epoch
         global max_lr
