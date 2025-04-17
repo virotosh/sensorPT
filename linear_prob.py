@@ -276,7 +276,7 @@ if __name__=="__main__":
         print('Y hat',torch.argmax(logit,  dim=-1))
         # accuracy
         y = test_dataset.y
-        print('Y hat',y)
+        print('Y',y)
         label = y.long()
         accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
         

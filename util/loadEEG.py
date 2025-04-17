@@ -111,9 +111,57 @@ def Load_BCIC_2b_raw_data(data_path, tmin=0, tmax=4,bandpass = [0,38]):
         scipy.io.savemat(os.path.join(save_test_path,'Data.mat'),{'x_data':test_x,'y_data':test_y})
 
 
+def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_sample=-1, use_avg=True, use_channels=None):
+    target_session_1_path = os.path.join(data_path,r'sub{}_Data.mat'.format(sub))
+    session_1_data = sio.loadmat(target_session_1_path)
+    session_1_x = session_1_data['x_data']
+    test_x_1 = torch.FloatTensor(session_1_x)      
+    test_y_1 = torch.LongTensor(session_1_data['y_data']).reshape(-1)
+    if target_sample>0:
+        test_x_1 = temporal_interpolation(test_x_1, target_sample, use_avg=use_avg)
+    if use_channels is not None:
+        test_dataset = eeg_dataset(test_x_1[:,use_channels,:],test_y_1)
+    else:
+        test_dataset = eeg_dataset(test_x_1,test_y_2)
+        
+    source_train_x = []
+    source_train_y = []
+    
+    for i in range(1,73):
+        if i == sub:
+            continue
+        train_path = os.path.join(data_path,r'sub{}_Data.mat'.format(i))
+        train_data = sio.loadmat(train_path)
+        session_1_x = train_data['x_data']
+        session_1_y = train_data['y_data'].reshape(-1)
+        
+        source_train_x.extend(session_1_x)
+        source_train_y.extend(session_1_y)
 
+    train_x,valid_x,train_y,valid_y = train_test_split(source_train_x,source_train_y,test_size = 0.3,stratify = source_train_y)
+    
+    source_train_x = torch.FloatTensor(np.array(train_x))
+    source_train_y = torch.LongTensor(np.array(train_y))
 
-
+    source_valid_x = torch.FloatTensor(np.array(valid_x))
+    source_valid_y = torch.LongTensor(np.array(valid_y))
+    
+    if target_sample>0:
+        source_train_x = temporal_interpolation(source_train_x, target_sample, use_avg=use_avg)
+        source_valid_x = temporal_interpolation(source_valid_x, target_sample, use_avg=use_avg)
+        
+    if use_channels is not None:
+        train_dataset = eeg_dataset(source_train_x[:,use_channels,:],source_train_y,source_train_s)
+    else:
+        train_dataset = eeg_dataset(source_train_x,source_train_y,source_train_s)
+    
+    if use_channels is not None:
+        valid_datset = eeg_dataset(source_valid_x[:,use_channels,:],source_valid_y,source_valid_s)
+    else:
+        valid_datset = eeg_dataset(source_valid_x,source_valid_y,source_valid_s)
+    
+    return train_dataset,valid_datset,test_dataset
+    
 def get_data(sub,data_path,few_shot_number = 1, is_few_EA = False, target_sample=-1, use_avg=True, use_channels=None):
     
     target_session_1_path = os.path.join(data_path,r'sub{}_train/Data.mat'.format(sub))
