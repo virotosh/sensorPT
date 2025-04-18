@@ -83,7 +83,7 @@ class LitSensorPT(pl.LightningModule):
         self.cls_token =        torch.nn.Parameter(torch.rand(1,1,64)*0.001, requires_grad=True)
         self.linear_probe2   =   LinearWithConstraint(64, self.num_class, max_norm=0.25)
         
-        self.drop           = torch.nn.Dropout(p=0.50)
+        self.drop           = torch.nn.Dropout(p=0.20)
         self.loss_fn        = torch.nn.CrossEntropyLoss()
         
         self.running_scores = {"train":[], "valid":[], "test":[]}
