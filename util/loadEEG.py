@@ -127,7 +127,7 @@ def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_s
     source_train_x = []
     source_train_y = []
 
-    for ff in range(10):
+    for ff in range(2):
         for i in range(1,73):
             if i == sub:
                 continue
