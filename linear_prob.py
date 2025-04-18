@@ -100,52 +100,12 @@ class LitSensorPT(pl.LightningModule):
         h = self.linear_probe2(h)
         
         return x, h
-        
-    def on_validation_epoch_start(self) -> None:
-        self.running_scores["valid"]=[]
-        return super().on_validation_epoch_start()
-    def on_validation_epoch_end(self) -> None:
-        if self.is_sanity:
-            self.is_sanity=False
-            return super().on_validation_epoch_end()
-            
-        label, y_score = [], []
-        for x,y in self.running_scores["valid"]:
-            label.append(x)
-            y_score.append(y)
-        label = torch.cat(label, dim=0)
-        y_score = torch.cat(y_score, dim=0)
-        print(label.shape, y_score.shape)
-        
-        metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1_weighted", "f1_macro", "f1_micro"]
-        results = get_metrics(y_score.cpu().numpy(), label.cpu().numpy(), metrics, False)
-        
-        for key, value in results.items():
-            self.log('valid_'+key, value, on_epoch=True, on_step=False, sync_dist=True)
-        
-        return super().on_validation_epoch_end()
-    def validation_step(self, batch, batch_idx):
-        # training_step defined the train loop.
-        # It is independent of forward
-        x, y = batch
-        label = y.long()
-        
-        x, logit = self.forward(x)
-        loss = self.loss_fn(logit, label)
-        accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
-        # Logging to TensorBoard by default
-        self.log('valid_loss', loss, on_epoch=True, on_step=False, sync_dist=True)
-        self.log('valid_acc', accuracy, on_epoch=True, on_step=False, sync_dist=True)
-        
-        self.running_scores["valid"].append((label.clone().detach().cpu(), logit.clone().detach().cpu()))
-        
-        return loss
     
     def training_step(self, batch, batch_idx):
         # training_step defined the train loop.
         # It is independent of forward
         x, y = batch
-        y = y.long()
+        y = F.one_hot(y.long(), num_classes=2).float()
         
         label = y
         
@@ -161,7 +121,7 @@ class LitSensorPT(pl.LightningModule):
         self.log('data_std', x.std(), on_epoch=True, on_step=False)
         
         return loss
-    
+        
     def on_validation_epoch_start(self) -> None:
         self.running_scores["valid"]=[]
         return super().on_validation_epoch_start()
