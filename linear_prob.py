@@ -77,7 +77,7 @@ class LitSensorPT(pl.LightningModule):
         self.linear_probe1   =   LinearWithConstraint(2048, 8, max_norm=1)
         self.linear_probe2   =   LinearWithConstraint(8*8, self.num_class, max_norm=0.25)
         
-        self.drop           = torch.nn.Dropout(p=0.2)
+        self.drop           = torch.nn.Dropout(p=0.5)
         
         self.loss_fn        = torch.nn.CrossEntropyLoss()
         self.running_scores = {"train":[], "valid":[], "test":[]}
@@ -209,7 +209,7 @@ if __name__=="__main__":
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 10
+        max_epochs = 100
         steps_per_epoch = math.ceil(len(train_loader) )
         max_lr = 4e-4
     
