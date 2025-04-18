@@ -9,7 +9,7 @@ from pytorch_lightning import loggers as pl_loggers
 import torch.nn.functional as F
 
 from util.utils_eval import get_metrics
-from util.loadEEG import get_data
+from util.loadEEG import get_data, get_IMWUTdata
 
 from model.SensorTransformer import SensorTransformerEncoder
 from model.module import Conv1dWithConstraint, LinearWithConstraint
@@ -21,14 +21,29 @@ class LitSensorPT(pl.LightningModule):
     def __init__(self):
         super().__init__()    
         
-        use_channels_names = [ 'C3', 'CZ', 'C4', ]
+        #use_channels_names = [      'FP1', 'FPZ', 'FP2', 
+        #                       'AF3', 'AF4', 
+        #    'F7', 'F5', 'F3', 'F1', 'FZ', 'F2', 'F4', 'F6', 'F8', 
+        #'FT7', 'FC5', 'FC3', 'FC1', 'FCZ', 'FC2', 'FC4', 'FC6', 'FT8', 
+        #    'T7', 'C5', 'C3', 'C1', 'CZ', 'C2', 'C4', 'C6', 'T8', 
+        #'TP7', 'CP5', 'CP3', 'CP1', 'CPZ', 'CP2', 'CP4', 'CP6', 'TP8',
+        #     'P7', 'P5', 'P3', 'P1', 'PZ', 'P2', 'P4', 'P6', 'P8', 
+        #              'PO7', 'PO3', 'POZ',  'PO4', 'PO8', 
+        #                       'O1', 'OZ', 'O2', ]
+        use_channels_names = ['S1_D1 hbo', 'S1_D1 hbr', 'S2_D1 hbo', 'S2_D1 hbr', 'S3_D1 hbo', 'S3_D1 hbr',
+                     'S1_D2 hbo', 'S1_D2 hbr', 'S3_D2 hbo', 'S3_D2 hbr', 'S4_D2 hbo', 'S4_D2 hbr', 'S2_D3 hbo',
+                     'S2_D3 hbr', 'S3_D3 hbo', 'S3_D3 hbr', 'S5_D3 hbo', 'S5_D3 hbr', 'S3_D4 hbo', 'S3_D4 hbr',
+                     'S4_D4 hbo', 'S4_D4 hbr', 'S5_D4 hbo', 'S5_D4 hbr', 'S6_D5 hbo', 'S6_D5 hbr', 'S7_D5 hbo',
+                     'S7_D5 hbr', 'S8_D5 hbo', 'S8_D5 hbr', 'S6_D6 hbo', 'S6_D6 hbr', 'S8_D6 hbo', 'S8_D6 hbr',
+                     'S9_D6 hbo', 'S9_D6 hbr', 'S7_D7 hbo', 'S7_D7 hbr', 'S8_D7 hbo', 'S8_D7 hbr', 'S10_D7 hbo',
+                     'S10_D7 hbr', 'S8_D8 hbo', 'S8_D8 hbr', 'S9_D8 hbo', 'S9_D8 hbr', 'S10_D8 hbo', 'S10_D8 hbr']
         self.chans_num = len(use_channels_names)
-        self.num_class = 4
+        self.num_class = 2
 
         # init model
         target_encoder = SensorTransformerEncoder(
-            img_size=[len(use_channels_names), 1024],
-            patch_size=32*2,
+            img_size=[len(use_channels_names), 256*2],
+            patch_size=64,
             embed_num=4,
             embed_dim=512,
             depth=8,
@@ -45,17 +60,19 @@ class LitSensorPT(pl.LightningModule):
         self.chans_id       = target_encoder.prepare_chan_ids(use_channels_names)
         
         # -- load checkpoint
-        load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=199-step=51600.ckpt"
-        pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cuda"))
+        #load_path="./logs/sensor_large_1.ckpt"
+        load_path="./logs/sensorPT_nemo_tb/version_1/checkpoints/epoch=199-step=5400.ckpt"
+        pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cpu"))
         
         target_encoder_stat = {}
         for k,v in pretrain_ckpt['state_dict'].items():
             if k.startswith("target_encoder."):
                 target_encoder_stat[k[15:]]=v
         
+                
         self.target_encoder.load_state_dict(target_encoder_stat)
         
-        self.chan_conv       = Conv1dWithConstraint(3, self.chans_num, 1, max_norm=1)
+        self.chan_conv       = Conv1dWithConstraint(self.chans_num, self.chans_num, 1, max_norm=1)
         
         self.linear_probe1   = LinearWithConstraint(2048, 64, max_norm=1)
         self.drop            = torch.nn.Dropout(p=0.50)        
@@ -187,27 +204,31 @@ class LitSensorPT(pl.LightningModule):
 
 if __name__=="__main__":
     # load data
-    data_path = "data/BCIC_2b_0_38HZ/"
-    for i in range(1,2):
+    #data_path = "data/BCIC_2b_0_38HZ/"
+    #data_path = "data/NEMO_exp/"
+    data_path = "data/IMWUT_exp/"
+    acc = []
+    for i in reversed(range(1,73)):
         all_subjects = [i]
         all_datas = []
-        train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = True, target_sample=256*4)
-        
+        #train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = False, target_sample=256*2)
+        train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,1, is_few_EA = False, target_sample=256*2)
         global max_epochs
         global steps_per_epoch
         global max_lr
-    
+        print(train_dataset.y)
+        print(valid_dataset.y)
         batch_size=64
-    
+        
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 100
+        max_epochs = 20
         steps_per_epoch = math.ceil(len(train_loader) )
         max_lr = 4e-4
     
         # init model
-        model = LitSensorPT(load_path="./logs/sensorPT_large_D_tb/version_0/checkpoints/epoch=199-step=51600.ckpt")
+        model = LitSensorPT()
     
         # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
         lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
@@ -217,21 +238,26 @@ if __name__=="__main__":
                              precision=16,
                              max_epochs=max_epochs, 
                              callbacks=callbacks,
-                             enable_checkpointing=False,
-                             logger=[pl_loggers.TensorBoardLogger('./logs/', name="EEGPT_BCIC2B_tb", version=f"subject{i}"), 
-                                     pl_loggers.CSVLogger('./logs/', name="EEGPT_BCIC2B_csv")])
+                             enable_checkpointing=True,
+                             logger=[pl_loggers.TensorBoardLogger('./logs/', name="IMWUTtest_tb", version=f"subject{i}"), 
+                                     pl_loggers.CSVLogger('./logs/', name="IMWUTtest_csv")])
+                             #logger=[pl_loggers.TensorBoardLogger('./logs/', name="EEGPT_BCIC2B_tb", version=f"subject{i}"), 
+                             #        pl_loggers.CSVLogger('./logs/', name="EEGPT_BCIC2B_csv")])
     
         trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
 
         # predict
         _, logit = model(test_dataset.x)
-        #print('Y hat',torch.argmax(logit,  dim=-1))
+        print('Y hat',torch.argmax(logit,  dim=-1))
         # accuracy
         y = test_dataset.y
+        print('Y',y)
         label = y.long()
         accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
         
         #print('Y:', test_dataset.y)
         print('accuracy',accuracy)
+        acc.append(accuracy)
+        print('AVERAGE accuracy',np.mean(np.array(acc)))
 
         

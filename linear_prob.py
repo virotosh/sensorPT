@@ -71,59 +71,46 @@ class LitSensorPT(pl.LightningModule):
         
                 
         self.target_encoder.load_state_dict(target_encoder_stat)
-        
+
         self.chan_conv       = Conv1dWithConstraint(self.chans_num, self.chans_num, 1, max_norm=1)
         
-        self.linear_probe1   = LinearWithConstraint(2048, 64, max_norm=1)
-        self.drop            = torch.nn.Dropout(p=0.50)        
-        self.decoder         = torch.nn.TransformerDecoder(
-                                    decoder_layer=torch.nn.TransformerDecoderLayer(64, 4, 64*4, activation=torch.nn.functional.gelu, batch_first=False),
-                                    num_layers=4
-                                )
-        self.cls_token =        torch.nn.Parameter(torch.rand(1,1,64)*0.001, requires_grad=True)
-        self.linear_probe2   =   LinearWithConstraint(64, self.num_class, max_norm=0.25)
+        self.linear_probe1   =   LinearWithConstraint(2048, 8, max_norm=1)
+        self.linear_probe2   =   LinearWithConstraint(8*8, self.num_class, max_norm=0.25)
         
-        self.drop           = torch.nn.Dropout(p=0.50)
+        self.drop           = torch.nn.Dropout(p=0.2)
+        
         self.loss_fn        = torch.nn.CrossEntropyLoss()
-        
         self.running_scores = {"train":[], "valid":[], "test":[]}
         self.is_sanity=True
     
     def forward(self, x):
         # print(x.shape) # B, C, T
-        B, C, T = x.shape
-        z = self.target_encoder(x, self.chans_id.to(x))
-        x = x/10
+        #B, C, T = x.shape
+        #x = x/10
         x = self.chan_conv(x)
         self.target_encoder.eval()
+        z = self.target_encoder(x, self.chans_id.to(x))
         
         h = z.flatten(2)
         
         h = self.linear_probe1(self.drop(h))
-        pos = create_1d_absolute_sin_cos_embedding(h.shape[1], dim=64)
-        h = h + pos.repeat((h.shape[0], 1, 1)).to(h)
         
-        h = torch.cat([self.cls_token.repeat((h.shape[0], 1, 1)).to(h.device), h], dim=1)
-        h = h.transpose(0,1)
-        h = self.decoder(h, h)[0,:,:]
-        ###
         h = h.flatten(1)
+        
         h = self.linear_probe2(h)
         
         return x, h
-
-
+    
     def training_step(self, batch, batch_idx):
         # training_step defined the train loop.
         # It is independent of forward
         x, y = batch
-        y = y.long()
-        
-        label = y
+        label = y.long()
         
         x, logit = self.forward(x)
         loss = self.loss_fn(logit, label)
         accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
+        
         # Logging to TensorBoard by default
         self.log('train_loss', loss, on_epoch=True, on_step=False)
         self.log('train_acc', accuracy, on_epoch=True, on_step=False)
@@ -133,11 +120,11 @@ class LitSensorPT(pl.LightningModule):
         self.log('data_std', x.std(), on_epoch=True, on_step=False)
         
         return loss
-    
+        
+        
     def on_validation_epoch_start(self) -> None:
         self.running_scores["valid"]=[]
         return super().on_validation_epoch_start()
-        
     def on_validation_epoch_end(self) -> None:
         if self.is_sanity:
             self.is_sanity=False
@@ -151,7 +138,7 @@ class LitSensorPT(pl.LightningModule):
         y_score = torch.cat(y_score, dim=0)
         print(label.shape, y_score.shape)
         
-        metrics = ["accuracy", "balanced_accuracy", "precision", "recall", "cohen_kappa", "f1", "roc_auc"]
+        metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1", "roc_auc"]
         results = get_metrics(y_score.cpu().numpy(), label.cpu().numpy(), metrics, True)
         
         for key, value in results.items():
@@ -178,12 +165,11 @@ class LitSensorPT(pl.LightningModule):
         return loss
     
     def configure_optimizers(self):
+        
         optimizer = torch.optim.AdamW(
             list(self.chan_conv.parameters())+
             list(self.linear_probe1.parameters())+
-            list(self.linear_probe2.parameters())+
-            [self.cls_token]+
-            list(self.decoder.parameters()),
+            list(self.linear_probe2.parameters()),
             weight_decay=0.01)#
         
         lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=max_lr, steps_per_epoch=steps_per_epoch, epochs=max_epochs, pct_start=0.2)
