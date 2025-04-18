@@ -111,7 +111,7 @@ class LitSensorPT(pl.LightningModule):
         
         x, logit = self.forward(x)
         loss = self.loss_fn(logit, label)
-        accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
+        accuracy = ((torch.argmax(logit, dim=-1)==torch.argmax(label, dim=-1))*1.0).mean()
         # Logging to TensorBoard by default
         self.log('train_loss', loss, on_epoch=True, on_step=False)
         self.log('train_acc', accuracy, on_epoch=True, on_step=False)
@@ -122,10 +122,10 @@ class LitSensorPT(pl.LightningModule):
         
         return loss
         
+        
     def on_validation_epoch_start(self) -> None:
         self.running_scores["valid"]=[]
         return super().on_validation_epoch_start()
-        
     def on_validation_epoch_end(self) -> None:
         if self.is_sanity:
             self.is_sanity=False
@@ -138,12 +138,9 @@ class LitSensorPT(pl.LightningModule):
         label = torch.cat(label, dim=0)
         y_score = torch.cat(y_score, dim=0)
         print(label.shape, y_score.shape)
-        #print(label)
-        #print(y_score)
         
-        #metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1_weighted", "f1_macro", "f1_micro"]
-        metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1", "roc_auc"] #"precision", "recall", 
-        results = get_metrics(y_score.cpu().numpy(), label.cpu().numpy(), metrics, True)#True)
+        metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1", "roc_auc"]
+        results = get_metrics(y_score.cpu().numpy(), label.cpu().numpy(), metrics, True)
         
         for key, value in results.items():
             self.log('valid_'+key, value, on_epoch=True, on_step=False, sync_dist=True)
@@ -169,6 +166,7 @@ class LitSensorPT(pl.LightningModule):
         return loss
     
     def configure_optimizers(self):
+        
         optimizer = torch.optim.AdamW(
             list(self.chan_conv.parameters())+
             list(self.linear_probe1.parameters())+
