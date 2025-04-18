@@ -86,7 +86,7 @@ class LitSensorPT(pl.LightningModule):
     def forward(self, x):
         # print(x.shape) # B, C, T
         #B, C, T = x.shape
-        #x = x/10
+        x = x/10
         x = self.chan_conv(x)
         self.target_encoder.eval()
         z = self.target_encoder(x, self.chans_id.to(x))
