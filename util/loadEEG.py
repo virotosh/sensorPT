@@ -138,7 +138,7 @@ def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_s
         source_train_x.extend(session_1_x)
         source_train_y.extend(session_1_y)
 
-    train_x,valid_x,train_y,valid_y = train_test_split(source_train_x,source_train_y,test_size = 0.3,stratify = source_train_y)
+    train_x,valid_x,train_y,valid_y = train_test_split(source_train_x,source_train_y,test_size = 0.2,stratify = source_train_y)
     
     source_train_x = torch.FloatTensor(np.array(train_x))
     source_train_y = torch.LongTensor(np.array(train_y))
