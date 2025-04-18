@@ -74,10 +74,10 @@ class LitSensorPT(pl.LightningModule):
 
         self.chan_conv       = Conv1dWithConstraint(self.chans_num, self.chans_num, 1, max_norm=1)
         
-        self.linear_probe1   =   LinearWithConstraint(2048, 8, max_norm=1)
+        self.linear_probe1   =   LinearWithConstraint(1024, 8, max_norm=1)
         self.linear_probe2   =   LinearWithConstraint(8*8, self.num_class, max_norm=0.25)
         
-        self.drop           = torch.nn.Dropout(p=0.50)
+        self.drop           = torch.nn.Dropout(p=0.20)
         
         self.loss_fn        = torch.nn.CrossEntropyLoss()
         self.running_scores = {"train":[], "valid":[], "test":[]}
@@ -105,13 +105,12 @@ class LitSensorPT(pl.LightningModule):
         # training_step defined the train loop.
         # It is independent of forward
         x, y = batch
-        y = F.one_hot(y.long(), num_classes=2).float()
-        
-        label = y
+        label = y.long()
         
         x, logit = self.forward(x)
         loss = self.loss_fn(logit, label)
-        accuracy = ((torch.argmax(logit, dim=-1)==torch.argmax(label, dim=-1))*1.0).mean()
+        accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
+        
         # Logging to TensorBoard by default
         self.log('train_loss', loss, on_epoch=True, on_step=False)
         self.log('train_acc', accuracy, on_epoch=True, on_step=False)
@@ -195,7 +194,7 @@ if __name__=="__main__":
     #data_path = "data/NEMO_exp/"
     data_path = "data/IMWUT_exp/"
     acc = []
-    for i in range(1,73):
+    for i in reversed(range(1,73)):
         all_subjects = [i]
         all_datas = []
         #train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = False, target_sample=256*2)
