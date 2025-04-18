@@ -61,7 +61,7 @@ class LitSensorPT(pl.LightningModule):
         
         # -- load checkpoint
         #load_path="./logs/sensor_large_1.ckpt"
-        load_path="./logs/sensorPT_nemo_tb/version_1/checkpoints/epoch=199-step=5400.ckpt"
+        load_path="./logs/sensorPT_nemo_tb/version_1/checkpoints/epoch=199-step=5600.ckpt"
         pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cpu"))
         
         target_encoder_stat = {}
@@ -223,7 +223,7 @@ if __name__=="__main__":
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 20
+        max_epochs = 10
         steps_per_epoch = math.ceil(len(train_loader) )
         max_lr = 4e-4
     
