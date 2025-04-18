@@ -151,7 +151,7 @@ class LitSensorPT(pl.LightningModule):
         y_score = torch.cat(y_score, dim=0)
         print(label.shape, y_score.shape)
         
-        metrics = ["accuracy", "balanced_accuracy", "precision", "recall", "cohen_kappa", "f1", "roc_auc"]
+        metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1", "roc_auc"] #"precision", "recall", 
         results = get_metrics(y_score.cpu().numpy(), label.cpu().numpy(), metrics, True)
         
         for key, value in results.items():
@@ -223,7 +223,7 @@ if __name__=="__main__":
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 100
+        max_epochs = 10
         steps_per_epoch = math.ceil(len(train_loader) )
         max_lr = 4e-4
     
