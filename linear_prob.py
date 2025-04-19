@@ -204,7 +204,7 @@ if __name__=="__main__":
         global max_lr
         print(train_dataset.y)
         print(valid_dataset.y)
-        batch_size=16
+        batch_size=64
         
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
