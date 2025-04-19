@@ -9,7 +9,7 @@ from pytorch_lightning import loggers as pl_loggers
 import torch.nn.functional as F
 
 from util.utils_eval import get_metrics
-from util.loadEEG import get_data, get_IMWUTdata
+from util.loadEEG import get_data, get_IMWUTdata, temporal_interpolation
 
 from model.SensorTransformer import SensorTransformerEncoder
 from model.module import Conv1dWithConstraint, LinearWithConstraint
@@ -90,9 +90,10 @@ class LitSensorPT(pl.LightningModule):
     
     def forward(self, x):
         # print(x.shape) # B, C, T
-        B, C, T = x.shape
+        #B, C, T = x.shape
         z = self.target_encoder(x, self.chans_id.to(x))
         #x = x/10
+        x = temporal_interpolation(x, 256*30)
         x = self.chan_conv(x)
         self.target_encoder.eval()
         
