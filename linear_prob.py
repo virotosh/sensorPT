@@ -77,7 +77,7 @@ class LitSensorPT(pl.LightningModule):
         self.linear_probe1   =   LinearWithConstraint(2048, 8, max_norm=1)
         self.linear_probe2   =   LinearWithConstraint(8*8, self.num_class, max_norm=0.25)
         
-        self.drop           = torch.nn.Dropout(p=0.83)
+        self.drop           = torch.nn.Dropout(p=0.81)
         
         self.loss_fn        = torch.nn.CrossEntropyLoss()
         self.running_scores = {"train":[], "valid":[], "test":[]}
@@ -86,7 +86,7 @@ class LitSensorPT(pl.LightningModule):
     def forward(self, x):
         # print(x.shape) # B, C, T
         #B, C, T = x.shape
-        x = x/10
+        #x = x/10
         x = self.chan_conv(x)
         self.target_encoder.eval()
         z = self.target_encoder(x, self.chans_id.to(x))
