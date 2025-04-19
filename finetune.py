@@ -75,7 +75,7 @@ class LitSensorPT(pl.LightningModule):
         self.chan_conv       = Conv1dWithConstraint(self.chans_num, self.chans_num, 1, max_norm=1)
         
         self.linear_probe1   = LinearWithConstraint(2048, 64, max_norm=1)
-        self.drop            = torch.nn.Dropout(p=0.5)        
+        self.drop            = torch.nn.Dropout(p=0.85)        
         self.decoder         = torch.nn.TransformerDecoder(
                                     decoder_layer=torch.nn.TransformerDecoderLayer(64, 4, 64*4, activation=torch.nn.functional.gelu, batch_first=False),
                                     num_layers=4
@@ -223,7 +223,7 @@ if __name__=="__main__":
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 20
+        max_epochs = 1
         steps_per_epoch = math.ceil(len(train_loader) )
         max_lr = 4e-4
     
