@@ -141,7 +141,7 @@ def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_s
     #augment
     for i in range(100):
         source_train_x.extend(np.random.uniform(low=-1.0, high=1.0, size=(1,48,512)))
-        source_train_y.extend(np.random.randint(2, size=(1,1)))
+        source_train_y.extend(np.random.randint(2, size=(1,1)).reshape(-1))
 
     train_x,valid_x,train_y,valid_y = train_test_split(source_train_x,source_train_y,test_size = 0.2,stratify = source_train_y)
     
