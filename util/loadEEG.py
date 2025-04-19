@@ -24,9 +24,9 @@ def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_s
     if target_sample>0:
         test_x_1 = temporal_interpolation(test_x_1, target_sample, use_avg=use_avg)
     if use_channels is not None:
-        test_dataset = eeg_dataset(test_x_1[:,use_channels,:],test_y_1)
+        test_dataset = sensor_dataset(test_x_1[:,use_channels,:],test_y_1)
     else:
-        test_dataset = eeg_dataset(test_x_1,test_y_1)
+        test_dataset = sensor_dataset(test_x_1,test_y_1)
         
     source_train_x = []
     source_train_y = []
@@ -61,14 +61,14 @@ def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_s
         source_valid_x = temporal_interpolation(source_valid_x, target_sample, use_avg=use_avg)
         
     if use_channels is not None:
-        train_dataset = eeg_dataset(source_train_x[:,use_channels,:],source_train_y)
+        train_dataset = sensor_dataset(source_train_x[:,use_channels,:],source_train_y)
     else:
-        train_dataset = eeg_dataset(source_train_x,source_train_y)
+        train_dataset = sensor_dataset(source_train_x,source_train_y)
     
     if use_channels is not None:
-        valid_datset = eeg_dataset(source_valid_x[:,use_channels,:],source_valid_y)
+        valid_datset = sensor_dataset(source_valid_x[:,use_channels,:],source_valid_y)
     else:
-        valid_datset = eeg_dataset(source_valid_x,source_valid_y)
+        valid_datset = sensor_dataset(source_valid_x,source_valid_y)
     
     return train_dataset,valid_datset,test_dataset
     
@@ -101,9 +101,9 @@ def get_data(sub,data_path,few_shot_number = 1, is_few_EA = False, target_sample
         test_x_1 = temporal_interpolation(test_x_1, target_sample, use_avg=use_avg)
         test_x_2 = temporal_interpolation(test_x_2, target_sample, use_avg=use_avg)
     if use_channels is not None:
-        test_dataset = eeg_dataset(torch.cat([test_x_1,test_x_2],dim=0)[:,use_channels,:],torch.cat([test_y_1,test_y_2],dim=0))
+        test_dataset = sensor_dataset(torch.cat([test_x_1,test_x_2],dim=0)[:,use_channels,:],torch.cat([test_y_1,test_y_2],dim=0))
     else:
-        test_dataset = eeg_dataset(torch.cat([test_x_1,test_x_2],dim=0),torch.cat([test_y_1,test_y_2],dim=0))
+        test_dataset = sensor_dataset(torch.cat([test_x_1,test_x_2],dim=0),torch.cat([test_y_1,test_y_2],dim=0))
 
     source_train_x = []
     source_train_y = []
@@ -168,14 +168,14 @@ def get_data(sub,data_path,few_shot_number = 1, is_few_EA = False, target_sample
         source_valid_x = temporal_interpolation(source_valid_x, target_sample, use_avg=use_avg)
         
     if use_channels is not None:
-        train_dataset = eeg_dataset(source_train_x[:,use_channels,:],source_train_y,source_train_s)
+        train_dataset = sensor_dataset(source_train_x[:,use_channels,:],source_train_y,source_train_s)
     else:
-        train_dataset = eeg_dataset(source_train_x,source_train_y,source_train_s)
+        train_dataset = sensor_dataset(source_train_x,source_train_y,source_train_s)
     
     if use_channels is not None:
-        valid_datset = eeg_dataset(source_valid_x[:,use_channels,:],source_valid_y,source_valid_s)
+        valid_datset = sensor_dataset(source_valid_x[:,use_channels,:],source_valid_y,source_valid_s)
     else:
-        valid_datset = eeg_dataset(source_valid_x,source_valid_y,source_valid_s)
+        valid_datset = sensor_dataset(source_valid_x,source_valid_y,source_valid_s)
     
     return train_dataset,valid_datset,test_dataset
 def EA(x,new_R = None):
@@ -218,12 +218,12 @@ def temporal_interpolation(x, desired_sequence_length, mode='nearest', use_avg=T
     else:
         raise ValueError("TemporalInterpolation only support sequence of single dim channels with optional batch")
 
-class eeg_dataset(Dataset):
+class sensor_dataset(Dataset):
     '''
     A class need to input the Dataloader in the pytorch.
     '''
     def __init__(self,feature,label,subject_id=None):
-        super(eeg_dataset,self).__init__()
+        super(sensor_dataset,self).__init__()
 
         self.x = feature
         self.y = label
