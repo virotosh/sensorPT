@@ -218,12 +218,12 @@ if __name__=="__main__":
         global max_lr
         print(train_dataset.y)
         print(valid_dataset.y)
-        batch_size=64
+        batch_size=16
         
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 100
+        max_epochs = 20
         steps_per_epoch = math.ceil(len(train_loader) )
         max_lr = 4e-4
     
@@ -235,7 +235,7 @@ if __name__=="__main__":
         callbacks = [lr_monitor]
         
         trainer = pl.Trainer(accelerator='cuda',
-                             precision=16,
+                             precision='16-mixed',
                              max_epochs=max_epochs, 
                              callbacks=callbacks,
                              enable_checkpointing=True,
