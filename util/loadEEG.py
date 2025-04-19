@@ -127,17 +127,21 @@ def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_s
     source_train_x = []
     source_train_y = []
 
-    for ff in range(1):
-        for i in range(1,73):
-            if i == sub:
-                continue
-            train_path = os.path.join(data_path,r'sub{}_Data.mat'.format(i))
-            train_data = sio.loadmat(train_path)
-            session_1_x = train_data['x_data']
-            session_1_y = train_data['y_data'].reshape(-1)
-            
-            source_train_x.extend(session_1_x)
-            source_train_y.extend(session_1_y)
+    
+    for i in range(1,73):
+        if i == sub:
+            continue
+        train_path = os.path.join(data_path,r'sub{}_Data.mat'.format(i))
+        train_data = sio.loadmat(train_path)
+        session_1_x = train_data['x_data']
+        session_1_y = train_data['y_data'].reshape(-1)
+        
+        source_train_x.extend(session_1_x)
+        source_train_y.extend(session_1_y)
+    #augment
+    for i in range(100):
+        source_train_x.extend(np.random.uniform(low=-1.0, high=1.0, size=(1,48,512)))
+        source_train_y.extend(np.random.randint(2, size=(1,1)))
 
     train_x,valid_x,train_y,valid_y = train_test_split(source_train_x,source_train_y,test_size = 0.2,stratify = source_train_y)
     
