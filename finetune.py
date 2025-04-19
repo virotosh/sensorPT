@@ -223,7 +223,7 @@ if __name__=="__main__":
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 1
+        max_epochs = 10
         steps_per_epoch = math.ceil(len(train_loader) )
         max_lr = 4e-4
     
