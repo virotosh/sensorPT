@@ -221,7 +221,7 @@ if __name__=="__main__":
         callbacks = [lr_monitor]
         
         trainer = pl.Trainer(accelerator='cuda',
-                             precision=16,
+                             precision='16-mixed',
                              max_epochs=max_epochs, 
                              callbacks=callbacks,
                              enable_checkpointing=True,
