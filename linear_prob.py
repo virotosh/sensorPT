@@ -187,7 +187,7 @@ if __name__=="__main__":
     for i in reversed(range(1,73)):
         all_subjects = [i]
         all_datas = []
-        train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,1, is_few_EA = False, target_sample=256*2)
+        train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2)
         global max_epochs
         global steps_per_epoch
         global max_lr
