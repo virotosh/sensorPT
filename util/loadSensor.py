@@ -46,7 +46,7 @@ def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_s
     train_x,valid_x,train_y,valid_y = train_test_split(source_train_x,source_train_y,test_size = 0.1,stratify = source_train_y)
     
     #augment
-    for i in range(30):
+    for i in range(35):
         train_x.extend(np.random.uniform(low=-1.0, high=1.0, size=(1,48,512)))
         train_y.extend(np.random.randint(2, size=(1,1)).reshape(-1))
         
