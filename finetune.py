@@ -83,8 +83,8 @@ class LitSensorPT(pl.LightningModule):
         # print(x.shape) # B, C, T
         #B, C, T = x.shape
         z = self.target_encoder(x, self.chans_id.to(x))
-        x = x/10
-        #x = temporal_interpolation(x, 256*30)
+        #x = x/10
+        x = temporal_interpolation(x, 256*30)
         x = self.chan_conv(x)
         self.target_encoder.eval()
         
@@ -211,9 +211,9 @@ if __name__=="__main__":
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 10
+        max_epochs = 1
         steps_per_epoch = math.ceil(len(train_loader) )
-        max_lr = 1e-4
+        max_lr = 4e-4
     
         # init model
         model = LitSensorPT()
