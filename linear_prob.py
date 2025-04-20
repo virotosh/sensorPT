@@ -78,7 +78,7 @@ class LitSensorPT(pl.LightningModule):
         # print(x.shape) # B, C, T
         #B, C, T = x.shape
         #x = x/10
-        x = temporal_interpolation(x, 256*30)
+        x = temporal_interpolation(x, 256*2)
         x = self.chan_conv(x)
         self.target_encoder.eval()
         z = self.target_encoder(x, self.chans_id.to(x))
