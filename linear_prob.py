@@ -230,7 +230,7 @@ if __name__=="__main__":
         
         #print('Y:', test_dataset.y)
         print('accuracy',accuracy)
-        ACCURACY = ACCURACY.append(accuracy)
+        ACCURACY = np.append(ACCURACY,accuracy)
         print('AVERAGE accuracy',np.mean(ACCURACY))
 
         
