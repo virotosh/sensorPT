@@ -9,7 +9,7 @@ from pytorch_lightning import loggers as pl_loggers
 import torch.nn.functional as F
 
 from util.utils_eval import get_metrics
-from util.loadEEG import get_data, get_IMWUTdata, temporal_interpolation
+from util.loadSensor import get_data, get_IMWUTdata, temporal_interpolation
 
 from model.SensorTransformer import SensorTransformerEncoder
 from model.module import Conv1dWithConstraint, LinearWithConstraint
@@ -21,15 +21,6 @@ class LitSensorPT(pl.LightningModule):
     def __init__(self):
         super().__init__()    
         
-        #use_channels_names = [      'FP1', 'FPZ', 'FP2', 
-        #                       'AF3', 'AF4', 
-        #    'F7', 'F5', 'F3', 'F1', 'FZ', 'F2', 'F4', 'F6', 'F8', 
-        #'FT7', 'FC5', 'FC3', 'FC1', 'FCZ', 'FC2', 'FC4', 'FC6', 'FT8', 
-        #    'T7', 'C5', 'C3', 'C1', 'CZ', 'C2', 'C4', 'C6', 'T8', 
-        #'TP7', 'CP5', 'CP3', 'CP1', 'CPZ', 'CP2', 'CP4', 'CP6', 'TP8',
-        #     'P7', 'P5', 'P3', 'P1', 'PZ', 'P2', 'P4', 'P6', 'P8', 
-        #              'PO7', 'PO3', 'POZ',  'PO4', 'PO8', 
-        #                       'O1', 'OZ', 'O2', ]
         use_channels_names = ['S1_D1 hbo', 'S1_D1 hbr', 'S2_D1 hbo', 'S2_D1 hbr', 'S3_D1 hbo', 'S3_D1 hbr',
                      'S1_D2 hbo', 'S1_D2 hbr', 'S3_D2 hbo', 'S3_D2 hbr', 'S4_D2 hbo', 'S4_D2 hbr', 'S2_D3 hbo',
                      'S2_D3 hbr', 'S3_D3 hbo', 'S3_D3 hbr', 'S5_D3 hbo', 'S5_D3 hbr', 'S3_D4 hbo', 'S3_D4 hbr',
@@ -86,7 +77,7 @@ class LitSensorPT(pl.LightningModule):
         self.loss_fn        = torch.nn.CrossEntropyLoss()
         
         self.running_scores = {"train":[], "valid":[], "test":[]}
-        self.is_sanity=False
+        self.is_sanity=True
     
     def forward(self, x):
         # print(x.shape) # B, C, T
@@ -209,7 +200,6 @@ if __name__=="__main__":
     for i in reversed(range(1,73)):
         all_subjects = [i]
         all_datas = []
-        #train_dataset,valid_dataset,test_dataset = get_data(i,data_path,1, is_few_EA = False, target_sample=256*2)
         train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,1, is_few_EA = False, target_sample=256*2)
         global max_epochs
         global steps_per_epoch
@@ -239,8 +229,6 @@ if __name__=="__main__":
                              enable_checkpointing=True,
                              logger=[pl_loggers.TensorBoardLogger('./logs/', name="IMWUTtest_tb", version=f"subject{i}"), 
                                      pl_loggers.CSVLogger('./logs/', name="IMWUTtest_csv")])
-                             #logger=[pl_loggers.TensorBoardLogger('./logs/', name="EEGPT_BCIC2B_tb", version=f"subject{i}"), 
-                             #        pl_loggers.CSVLogger('./logs/', name="EEGPT_BCIC2B_csv")])
     
         trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
 
