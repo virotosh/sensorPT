@@ -193,14 +193,14 @@ if __name__=="__main__":
         global max_lr
         print(train_dataset.y)
         print(valid_dataset.y)
-        batch_size=8
+        batch_size=64
         
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 100
+        max_epochs = 1
         steps_per_epoch = math.ceil(len(train_loader) )
-        max_lr = 1e-4
+        max_lr = 0.001
     
         # init model
         model = LitSensorPT()
