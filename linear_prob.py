@@ -183,7 +183,7 @@ class LitSensorPT(pl.LightningModule):
 if __name__=="__main__":
     # load data
     data_path = "IMWUT_data/"
-    acc = []
+    ACCURACY = np.array([])
     for i in reversed(range(1,73)):
         all_subjects = [i]
         all_datas = []
@@ -230,7 +230,7 @@ if __name__=="__main__":
         
         #print('Y:', test_dataset.y)
         print('accuracy',accuracy)
-        acc.append(accuracy)
-        print('AVERAGE accuracy',np.mean(np.array(acc)))
+        ACCURACY.append(accuracy)
+        print('AVERAGE accuracy',np.mean(ACCURACY))
 
         
