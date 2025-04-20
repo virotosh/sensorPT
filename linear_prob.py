@@ -61,8 +61,8 @@ class LitSensorPT(pl.LightningModule):
         
         # -- load checkpoint
         #load_path="./logs/sensor_large_1.ckpt"
-        load_path="./logs/sensorPT_nemo_tb/version_1/checkpoints/epoch=199-step=5600.ckpt"
-        pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cpu"))
+        load_path="./data/pretrained_NEMO.ckpt"
+        pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cuda"))
         
         target_encoder_stat = {}
         for k,v in pretrain_ckpt['state_dict'].items():
@@ -190,9 +190,7 @@ class LitSensorPT(pl.LightningModule):
 
 if __name__=="__main__":
     # load data
-    #data_path = "data/BCIC_2b_0_38HZ/"
-    #data_path = "data/NEMO_exp/"
-    data_path = "data/IMWUT_exp/"
+    data_path = "IMWUT_data/"
     acc = []
     for i in reversed(range(1,73)):
         all_subjects = [i]
