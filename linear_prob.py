@@ -9,7 +9,7 @@ from pytorch_lightning import loggers as pl_loggers
 import torch.nn.functional as F
 
 from util.utils_eval import get_metrics
-from util.loadSensor import get_data, get_IMWUTdata, temporal_interpolation
+from util.loadSensor import get_data, get_IMWUTdata, temporal_interpolation, one_IMWUTdata
 
 from model.SensorTransformer import SensorTransformerEncoder
 from model.module import Conv1dWithConstraint, LinearWithConstraint
