@@ -21,9 +21,9 @@ def one_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_s
 
     for i in range(29,42):
         test_path = os.path.join(data_path,r'sub{}_Data.mat'.format(i))
-        test_data = sio.loadmat(train_path)
-        session_1_x = train_data['x_data']
-        session_1_y = train_data['y_data'].reshape(-1)
+        test_data = sio.loadmat(test_path)
+        session_1_x = test_data['x_data']
+        session_1_y = test_data['y_data'].reshape(-1)
         
         source_test_x.extend(session_1_x)
         source_test_y.extend(session_1_y)
