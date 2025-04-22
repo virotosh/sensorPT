@@ -184,7 +184,7 @@ if __name__=="__main__":
     # load data
     data_path = "IMWUT_data/"
     ACCURACY = np.array([])
-    sub_indices = [ [0,29], [29,42], [42, 57], [57,73] ]
+    sub_indices = [ [1,29], [29,42], [42, 57], [57,73] ]
     for i in sub_indices:#for i in reversed(range(1,73)):
         all_subjects = [i]
         all_datas = []
