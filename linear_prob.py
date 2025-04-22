@@ -9,7 +9,7 @@ from pytorch_lightning import loggers as pl_loggers
 import torch.nn.functional as F
 
 from util.utils_eval import get_metrics
-from util.loadSensor import get_data, get_IMWUTdata, temporal_interpolation, one_IMWUTdata
+from util.loadSensor import get_data, get_IMWUTdata, temporal_interpolation, leave_one_user_out_IMWUTdata
 
 from model.SensorTransformer import SensorTransformerEncoder
 from model.module import Conv1dWithConstraint, LinearWithConstraint
@@ -184,7 +184,8 @@ if __name__=="__main__":
     # load data
     data_path = "IMWUT_data/"
     ACCURACY = np.array([])
-    for i in reversed(range(1,73)):
+    sub_indices = [ [0,29], [29,42], [42, 57], [57,73] ]
+    for i in sub_indices:#for i in reversed(range(1,73)):
         all_subjects = [i]
         all_datas = []
         train_dataset,valid_dataset,test_dataset = one_IMWUTdata(i,data_path,0, target_sample=256*2)#get_IMWUTdata(i,data_path,0, target_sample=256*2)
@@ -193,7 +194,7 @@ if __name__=="__main__":
         global max_lr
         print(train_dataset.y)
         print(valid_dataset.y)
-        batch_size=32
+        batch_size=64
         
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
