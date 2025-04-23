@@ -34,7 +34,7 @@ class LitSensorPT(pl.LightningModule):
                      'S1_D2 hbr', 'S3_D2 hbr', 'S4_D2 hbr', 'S3_D3 hbr', 'S5_D3 hbr', 'S3_D4 hbr', 'S4_D4 hbr', 'S5_D4 hbr', 'S6_D5 hbr',
                      'S8_D5 hbr', 'S6_D6 hbr', 'S8_D6 hbr', 'S9_D6 hbr', 'S8_D7 hbr', 'S7_D7 hbr', 'S8_D8 hbr', 'S9_D8 hbr', 'S10_D8 hbr']
         self.chans_num = len(use_channels_names)
-        self.num_class = 2
+        self.num_class = 4
 
         # init model
         target_encoder = SensorTransformerEncoder(
@@ -204,7 +204,7 @@ if __name__=="__main__":
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 10
+        max_epochs = 1
         steps_per_epoch = math.ceil(len(train_loader) )
         max_lr = 1e-4
     

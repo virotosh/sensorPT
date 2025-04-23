@@ -118,7 +118,7 @@ def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_s
     if agument:
         for i in range(30):
             train_x.extend(np.random.uniform(low=-1.0, high=1.0, size=(1,40,512)))
-            train_y.extend(np.random.randint(2, size=(1,1)).reshape(-1))
+            train_y.extend(np.random.randint(4, size=(1,1)).reshape(-1))
         
     source_train_x = torch.FloatTensor(np.array(train_x))
     source_train_y = torch.LongTensor(np.array(train_y))
