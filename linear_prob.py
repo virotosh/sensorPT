@@ -155,11 +155,13 @@ class LitSensorPT(pl.LightningModule):
         self.log('valid_loss', loss, on_epoch=True, on_step=False)
         self.log('valid_acc', accuracy, on_epoch=True, on_step=False)
         
-        y_score =  logit
-        y_score =  torch.softmax(y_score, dim=-1)[:,1]
-        self.running_scores["valid"].append((label.clone().detach().cpu(), y_score.clone().detach().cpu()))
-
+        self.running_scores["valid"].append((label.clone().detach().cpu(), logit.clone().detach().cpu()))
         return loss
+        
+#        y_score =  logit
+#        y_score =  torch.softmax(y_score, dim=-1)[:,1]
+#        self.running_scores["valid"].append((label.clone().detach().cpu(), y_score.clone().detach().cpu()))
+#        return loss
     
     def configure_optimizers(self):
         
