@@ -136,7 +136,7 @@ class LitSensorPT(pl.LightningModule):
         print(label.shape, y_score.shape)
         
         metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1_weighted", "f1_macro", "f1_micro"]
-        results = get_metrics(y_score.cpu().numpy(), label.cpu().numpy(), metrics, True)
+        results = get_metrics(y_score.cpu().numpy(), label.cpu().numpy(), metrics, False)
         
         for key, value in results.items():
             self.log('valid_'+key, value, on_epoch=True, on_step=False, sync_dist=True)
