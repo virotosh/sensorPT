@@ -238,5 +238,4 @@ if __name__=="__main__":
         print('accuracy',accuracy)
         ACCURACY = np.append(ACCURACY,accuracy)
         print('AVERAGE accuracy',np.mean(ACCURACY))
-        break
         
