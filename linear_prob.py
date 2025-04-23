@@ -193,7 +193,7 @@ if __name__=="__main__":
     for i in reversed(range(1,195)):
         all_subjects = [i]
         all_datas = []
-        train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2, agument=True)
+        train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2, agument=False)
         global max_epochs
         global steps_per_epoch
         global max_lr
@@ -204,9 +204,9 @@ if __name__=="__main__":
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 20
+        max_epochs = 10
         steps_per_epoch = math.ceil(len(train_loader) )
-        max_lr = 1e-4
+        max_lr = 4e-4
     
         # init model
         model = LitSensorPT()
