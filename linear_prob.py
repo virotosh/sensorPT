@@ -28,11 +28,11 @@ class LitSensorPT(pl.LightningModule):
         #             'S7_D5 hbr', 'S8_D5 hbo', 'S8_D5 hbr', 'S6_D6 hbo', 'S6_D6 hbr', 'S8_D6 hbo', 'S8_D6 hbr',
         #             'S9_D6 hbo', 'S9_D6 hbr', 'S7_D7 hbo', 'S7_D7 hbr', 'S8_D7 hbo', 'S8_D7 hbr', 'S10_D7 hbo',
         #             'S10_D7 hbr', 'S8_D8 hbo', 'S8_D8 hbr', 'S9_D8 hbo', 'S9_D8 hbr', 'S10_D8 hbo', 'S10_D8 hbr']
-        use_channels_names = ['S2_D1 hbo','S3_D1 hbo', 'S1_D2 hbo', 'S3_D2 hbo', 'S4_D2 hbo', 'S3_D3 hbo', 'S5_D3 hbo', 'S3_D4 hbo',
-                             'S4_D4 hbo', 'S5_D4 hbo', 'S6_D5 hbo', 'S8_D5 hbo', 'S6_D6 hbo', 'S8_D6 hbo', 'S9_D6 hbo', 'S8_D7 hbo',
-                             'S7_D7 hbo', 'S8_D8 hbo', 'S9_D8 hbo', 'S10_D8 hbo', 'S2_D1 hbr', 'S3_D1 hbr', 'S1_D2 hbr', 'S3_D2 hbr',
-                             'S4_D2 hbr', 'S3_D3 hbr', 'S5_D3 hbr', 'S3_D4 hbr', 'S4_D4 hbr', 'S5_D4 hbr', 'S6_D5 hbr', 'S8_D5 hbr',
-                             'S6_D6 hbr', 'S8_D6 hbr', 'S9_D6 hbr', 'S8_D7 hbr', 'S7_D7 hbr', 'S8_D8 hbr', 'S9_D8 hbr', 'S10_D8 hbr']
+        use_channels_names = ['S2_D1 hbo', 'S3_D1 hbo', 'S1_D2 hbo', 'S3_D2 hbo',
+                     'S4_D2 hbo', 'S3_D3 hbo', 'S5_D3 hbo', 'S3_D4 hbo', 'S4_D4 hbo', 'S5_D4 hbo', 'S6_D5 hbo', 'S8_D5 hbo', 'S6_D6 hbo',
+                     'S8_D6 hbo', 'S9_D6 hbo', 'S8_D7 hbo', 'S7_D7 hbo', 'S8_D8 hbo', 'S9_D8 hbo', 'S10_D8 hbo', 'S2_D1 hbr', 'S3_D1 hbr',
+                     'S1_D2 hbr', 'S3_D2 hbr', 'S4_D2 hbr', 'S3_D3 hbr', 'S5_D3 hbr', 'S3_D4 hbr', 'S4_D4 hbr', 'S5_D4 hbr', 'S6_D5 hbr',
+                     'S8_D5 hbr', 'S6_D6 hbr', 'S8_D6 hbr', 'S9_D6 hbr', 'S8_D7 hbr', 'S7_D7 hbr', 'S8_D8 hbr', 'S9_D8 hbr', 'S10_D8 hbr']
         self.chans_num = len(use_channels_names)
         self.num_class = 2
 
