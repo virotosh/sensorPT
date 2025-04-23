@@ -82,8 +82,8 @@ class LitSensorPT(pl.LightningModule):
     def forward(self, x):
         # print(x.shape) # B, C, T
         #B, C, T = x.shape
-        x = x/10
-        #x = temporal_interpolation(x, 256*2)
+        #x = x/10
+        x = temporal_interpolation(x, 256*2)
         x = self.chan_conv(x)
         self.target_encoder.eval()
         z = self.target_encoder(x, self.chans_id.to(x))
@@ -207,7 +207,7 @@ if __name__=="__main__":
         
         max_epochs = 1
         steps_per_epoch = math.ceil(len(train_loader) )
-        max_lr = 4e-4
+        max_lr = 1e-4
     
         # init model
         model = LitSensorPT()
