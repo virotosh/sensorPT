@@ -135,7 +135,7 @@ class LitSensorPT(pl.LightningModule):
         y_score = torch.cat(y_score, dim=0)
         print(label.shape, y_score.shape)
         
-        metrics = ["accuracy", "balanced_accuracy", "precision", "recall", "cohen_kappa", "f1", "roc_auc"]
+        metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1_weighted", "f1_macro", "f1_micro"]
         results = get_metrics(y_score.cpu().numpy(), label.cpu().numpy(), metrics, True)
         
         for key, value in results.items():
