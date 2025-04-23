@@ -57,7 +57,7 @@ def leave_one_user_out_IMWUTdata(sub_indices,data_path,few_shot_number = 1, is_f
     
     #augment
     if agument:
-        for i in range(70):
+        for i in range(60):
             train_x.extend(np.random.uniform(low=-1.0, high=1.0, size=(1,40,512)))
             train_y.extend(np.random.randint(4, size=(1,1)).reshape(-1))
         
