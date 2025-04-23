@@ -16,11 +16,9 @@ from torch.utils.data import Dataset,DataLoader
 
 
 def leave_one_user_out_IMWUTdata(sub_indices,data_path,few_shot_number = 1, is_few_EA = False, target_sample=-1, use_avg=True, use_channels=None, agument=True):
-    start_idx = sub_indices[0]
-    end_idx = sub_indices[1]
     source_test_x = []
     source_test_y = []
-    for i in range(start_idx,end_idx):
+    for i in sub_indices:
         test_path = os.path.join(data_path,r'sub{}_Data.mat'.format(i))
         test_data = sio.loadmat(test_path)
         session_1_x = test_data['x_data']
@@ -44,8 +42,8 @@ def leave_one_user_out_IMWUTdata(sub_indices,data_path,few_shot_number = 1, is_f
     source_train_y = []
 
     
-    for i in range(1,73):
-        if i>=start_idx and i<=end_idx:
+    for i in range(1,195):
+        if i in sub_indices:
             continue
         train_path = os.path.join(data_path,r'sub{}_Data.mat'.format(i))
         train_data = sio.loadmat(train_path)
