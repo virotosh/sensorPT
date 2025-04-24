@@ -18,7 +18,7 @@ seed_torch(7)
 
 class LitSensorPT(pl.LightningModule):
     
-    def __init__(self, num_class):
+    def __init__(self):
         super().__init__()    
 
         #use_channels_names = ['S1_D1 hbo', 'S1_D1 hbr', 'S2_D1 hbo', 'S2_D1 hbr', 'S3_D1 hbo', 'S3_D1 hbr',
@@ -34,7 +34,7 @@ class LitSensorPT(pl.LightningModule):
                      'S1_D2 hbr', 'S3_D2 hbr', 'S4_D2 hbr', 'S3_D3 hbr', 'S5_D3 hbr', 'S3_D4 hbr', 'S4_D4 hbr', 'S5_D4 hbr', 'S6_D5 hbr',
                      'S8_D5 hbr', 'S6_D6 hbr', 'S8_D6 hbr', 'S9_D6 hbr', 'S8_D7 hbr', 'S7_D7 hbr', 'S8_D8 hbr', 'S9_D8 hbr', 'S10_D8 hbr']
         self.chans_num = len(use_channels_names)
-        self.num_class = num_class
+        self.num_class = 4
 
         # init model
         target_encoder = SensorTransformerEncoder(
@@ -208,11 +208,11 @@ if __name__=="__main__":
         
         max_epochs = 1
         steps_per_epoch = math.ceil(len(train_loader) )
-        max_lr = 0.01
+        max_lr = 0.005
     
         # init model
         #print(len(list(set(valid_dataset.y.tolist()))))
-        model = LitSensorPT(4)
+        model = LitSensorPT()
     
         # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
         lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
