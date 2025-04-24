@@ -195,7 +195,7 @@ if __name__=="__main__":
     for i in reversed(range(1,195)):
     #for i in sub_indices:
         #train_dataset,valid_dataset,test_dataset = leave_one_user_out_IMWUTdata(i,data_path,0, target_sample=256*2, agument=True)
-        train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2, agument=False)
+        train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2, agument=True)
         global max_epochs
         global steps_per_epoch
         global max_lr
