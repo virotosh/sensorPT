@@ -215,8 +215,7 @@ if __name__=="__main__":
         
             # init model
             print(len(list(set(valid_dataset.y.tolist()))))
-            model = LitSensorPT(len(list(set(valid_dataset.y.tolist()))))
-            #model.num_class = len(list(set(list(valid_dataset.y))))
+            model = LitSensorPT(4)
         
             # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
             lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
