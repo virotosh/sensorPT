@@ -197,7 +197,7 @@ if __name__=="__main__":
     #for i in sub_indices:
         #train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2, agument=False)
     for indice in sub_indices:
-        if len(indice<=10):
+        if len(indice)<=10:
             continue
         user_acc = np.array([])
         for i in indice:
