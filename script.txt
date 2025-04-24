@@ -1,0 +1,180 @@
+from collections import defaultdict
+import numpy as np
+import pandas as pd
+from pathlib import Path
+import random
+import os
+import torch
+from scipy.io import savemat
+
+
+csv_data_path = (
+    "./../../data/empe_csv"  # Set this to the folder where you have the csv files
+)
+epochs_df = pd.read_csv(Path(csv_data_path) / "epochs.csv", sep=";")
+epochs_metadata = pd.read_csv(
+    Path(csv_data_path) / "epochs_metadata.csv", sep=";"
+)
+
+X, y = defaultdict(list), defaultdict(list)
+chs = [c for c in epochs_df.columns if " hbo" in c or " hbr" in c]
+
+for epoch in epochs_df["epoch"].unique():
+    dst="data/merged_nemo/"
+    if random.random()<0.1:
+        dst+="ValidFolder/0/"
+    else:
+        dst+="TrainFolder/0/"
+    os.makedirs(dst, exist_ok=True)
+    epoch_df = epochs_df[epochs_df["epoch"] == epoch]
+    sub = epoch_df["subject"].iloc[0]
+    data = []
+    w_len = 501
+    for ch in chs:
+        padding = [0.0 for i in range (512-w_len)]
+        data.append(list(epoch_df[ch][:w_len])+padding)
+    _d = torch.from_numpy(np.array(data, dtype='float32') )
+    torch.save(_d, dst + 'NEMO'+f"_empe_{sub}_{epoch}.edf")
+
+
+
+
+csv_data_path = (
+    "./../../data/afim_csv"  # Set this to the folder where you have the csv files
+)
+epochs_df = pd.read_csv(Path(csv_data_path) / "epochs.csv", sep=";")
+epochs_metadata = pd.read_csv(
+    Path(csv_data_path) / "epochs_metadata.csv", sep=";"
+)
+
+X, y = defaultdict(list), defaultdict(list)
+chs = [c for c in epochs_df.columns if " hbo" in c or " hbr" in c]
+
+for epoch in epochs_df["epoch"].unique():
+    dst="data/merged_nemo/"
+    if random.random()<0.1:
+        dst+="ValidFolder/0/"
+    else:
+        dst+="TrainFolder/0/"
+    os.makedirs(dst, exist_ok=True)
+    epoch_df = epochs_df[epochs_df["epoch"] == epoch]
+    sub = epoch_df["subject"].iloc[0]
+    data = []
+    w_len = 501
+    for ch in chs:
+        padding = [0.0 for i in range (512-w_len)]
+        data.append(list(epoch_df[ch][:w_len])+padding)
+    _d = torch.from_numpy(np.array(data, dtype='float32') )
+    torch.save(_d, dst + 'NEMO'+f"_afim_{sub}_{epoch}.edf")
+
+
+
+
+### some fake test data
+csv_data_path = (
+    "./../../data/empe_csv"  # Set this to the folder where you have the csv files
+)
+epochs_df = pd.read_csv(Path(csv_data_path) / "epochs.csv", sep=";")
+epochs_metadata = pd.read_csv(
+    Path(csv_data_path) / "epochs_metadata.csv", sep=";"
+)
+
+X, y = defaultdict(list), defaultdict(list)
+chs = [c for c in epochs_df.columns if " hbo" in c or " hbr" in c]
+
+_data = {'train':{1:[],2:[],3:[],4:[],5:[]}, 
+         'test':{1:[],2:[],3:[],4:[],5:[]}}
+_label = {'train':{1:[],2:[],3:[],4:[],5:[]}, 
+         'test':{1:[],2:[],3:[],4:[],5:[]}}
+for epoch in epochs_df["epoch"].unique():
+    epoch_df = epochs_df[epochs_df["epoch"] == epoch]
+    sub = epoch_df["subject"].iloc[0]
+    label = epochs_metadata.loc[epoch, "value"]
+    if sub == 'sub-149':
+        continue
+    if label>=2:
+        continue
+    data = []
+    w_len = 512
+    for ch in chs:
+        data.append(list(epoch_df[ch][:w_len]))
+
+    train_test = 'train' if sub in ['sub-101', 'sub-105', 'sub-107', 'sub-108', 'sub-109', 'sub-112',
+       'sub-113', 'sub-119', 'sub-120', 'sub-121', 'sub-123', 'sub-124', 'sub-125', 'sub-126', 'sub-127'] else 'test'
+    sub_id = 1
+    if sub in ['sub-108', 'sub-109', 'sub-112',  'sub-133', 'sub-134', 'sub-139']:
+        sub_id = 2
+    if sub in ['sub-113', 'sub-119', 'sub-120',  'sub-140', 'sub-141', 'sub-142']:
+        sub_id = 3
+    if sub in ['sub-121', 'sub-123', 'sub-124',  'sub-143', 'sub-144', 'sub-145']:
+        sub_id = 4
+    if sub in ['sub-125', 'sub-126', 'sub-127',  'sub-146', 'sub-147', 'sub-148']:
+        sub_id = 5
+    _data[train_test][sub_id].append(data)
+    _label[train_test][sub_id].append(label)
+
+
+
+
+for train_test, subs in _data.items():
+    for sub_id,data in subs.items():    
+        #print(np.array(data[:100]).shape)
+        os.makedirs(f"data/NEMO_exp/sub{sub_id}_{train_test}", exist_ok=True)
+        savemat(f"data/NEMO_exp/sub{sub_id}_{train_test}/Data.mat", {'x_data':data[:100],'y_data':[_label[train_test][sub_id][:100]]}, oned_as='row')
+
+
+
+
+a = ['S2_D1 hbo', 'S3_D1 hbo', 'S1_D2 hbo', 'S2_D2 hbo', 'S3_D2 hbo', 'S4_D2 hbo', 'S10_D2 hbo', 'S3_D3 hbo', 'S5_D3 hbo', 'S3_D4 hbo', 'S4_D4 hbo', 'S5_D4 hbo', 'S10_D4 hbo', 'S6_D5 hbo', 'S8_D5 hbo', 'S1_D6 hbo', 'S6_D6 hbo', 'S8_D6 hbo', 'S9_D6 hbo', 'S10_D6 hbo', 'S8_D7 hbo', 'S7_D7 hbo', 'S8_D8 hbo', 'S7_D8 hbo', 'S9_D8 hbo', 'S10_D8 hbo', 'S2_D1 hbr', 'S3_D1 hbr', 'S1_D2 hbr', 'S2_D2 hbr', 'S3_D2 hbr', 'S4_D2 hbr', 'S10_D2 hbr', 'S3_D3 hbr', 'S5_D3 hbr', 'S3_D4 hbr', 'S4_D4 hbr', 'S5_D4 hbr', 'S10_D4 hbr', 'S6_D5 hbr', 'S8_D5 hbr', 'S1_D6 hbr', 'S6_D6 hbr', 'S8_D6 hbr', 'S9_D6 hbr', 'S10_D6 hbr', 'S8_D7 hbr', 'S7_D7 hbr', 'S8_D8 hbr', 'S7_D8 hbr', 'S9_D8 hbr', 'S10_D8 hbr']
+b = ['S1_D1 hbo', 'S2_D1 hbo', 'S3_D1 hbo', 'S1_D2 hbo', 'S3_D2 hbo', 'S4_D2 hbo', 'S2_D3 hbo', 'S3_D3 hbo', 'S5_D3 hbo', 'S3_D4 hbo', 'S4_D4 hbo', 'S5_D4 hbo', 'S7_D5 hbo', 'S6_D5 hbo', 'S8_D5 hbo', 'S6_D6 hbo', 'S8_D6 hbo', 'S9_D6 hbo', 'S7_D7 hbo', 'S8_D7 hbo', 'S10_D7 hbo', 'S8_D8 hbo', 'S10_D8 hbo', 'S9_D8 hbo', 'S1_D1 hbr', 'S2_D1 hbr', 'S3_D1 hbr', 'S1_D2 hbr', 'S3_D2 hbr', 'S4_D2 hbr', 'S2_D3 hbr', 'S3_D3 hbr', 'S5_D3 hbr', 'S3_D4 hbr', 'S4_D4 hbr', 'S5_D4 hbr', 'S7_D5 hbr', 'S6_D5 hbr', 'S8_D5 hbr', 'S6_D6 hbr', 'S8_D6 hbr', 'S9_D6 hbr', 'S7_D7 hbr', 'S8_D7 hbr', 'S10_D7 hbr', 'S8_D8 hbr', 'S10_D8 hbr', 'S9_D8 hbr']
+c = list(set(a) & set(b))
+
+
+## IMWUT
+sub_id = 1
+abc = []
+user_epoch={}
+for i in ['02','03','04','05','06','07','08','09','10','11','12','13','14']:
+    if i not in user_epoch:
+        user_epoch[i] = []
+    epochs = np.load(f'IMWUT_data/labeled_epochs_s{i}.npz') 
+    w_len = 501
+    for idx,data in enumerate(epochs['data']):
+        DATAS = []
+        LABELS = []
+        chs_names = []
+        chs = []
+        for ch_idx,ch in enumerate(data):
+            if epochs['channels'][ch_idx] not in c:
+                continue
+            if (epochs['channels'][ch_idx] in ['S2_D2 hbo', 'S10_D2 hbo', 'S10_D4 hbo', 'S1_D6 hbo', 'S10_D6 hbo', 'S7_D8 hbo', 'S2_D2 hbr', 'S10_D2 hbr', 'S10_D4 hbr', 'S1_D6 hbr', 'S10_D6 hbr', 'S7_D8 hbr']):
+                continue
+            padding = [0.0 for i in range (512-w_len)]
+            chs.append(list(ch[:w_len])+padding)
+            chs_names.append(epochs['channels'][ch_idx])
+        DATAS.append(chs)
+        #'HANV', 'HAPV', 'LANV', 'LAPV'
+        l = 0 
+        if epochs['labels'][idx] == 'HANV': 
+            l= 1
+        if epochs['labels'][idx] == 'LAPV': 
+            l= 2
+        if epochs['labels'][idx] == 'HAPV': 
+            l= 3
+        LABELS = [[l]]
+        abc.append(l)
+        print(np.array(DATAS).shape)
+        print(np.array(LABELS).shape)
+
+        os.makedirs(f"data/IMWUT_exp2", exist_ok=True)
+        savemat(f"data/IMWUT_exp2/sub{sub_id}_Data.mat", {'x_data':DATAS,'y_data':LABELS}, oned_as='row')
+        user_epoch[i].append(sub_id)
+        sub_id+=1
+
+
+
+np.array(DATAS).shape
+users = []
+for u,e in user_epoch.items():
+    users.append(e)
+print(list(users))
