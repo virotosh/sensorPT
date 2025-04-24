@@ -195,7 +195,7 @@ if __name__=="__main__":
     for i in reversed(range(1,195)):
     #for i in sub_indices:
         #train_dataset,valid_dataset,test_dataset = leave_one_user_out_IMWUTdata(i,data_path,0, target_sample=256*2, agument=True)
-        train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2, agument=True)
+        train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2, agument=False)
         global max_epochs
         global steps_per_epoch
         global max_lr
@@ -206,7 +206,7 @@ if __name__=="__main__":
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 1
+        max_epochs = 20
         steps_per_epoch = math.ceil(len(train_loader) )
         max_lr = 0.01
     
