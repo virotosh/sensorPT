@@ -211,10 +211,10 @@ if __name__=="__main__":
             
             max_epochs = 1
             steps_per_epoch = math.ceil(len(train_loader) )
-            max_lr = 0.005
+            max_lr = 0.01
         
             # init model
-            print(len(list(set(valid_dataset.y.tolist()))))
+            #print(len(list(set(valid_dataset.y.tolist()))))
             model = LitSensorPT(4)
         
             # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
