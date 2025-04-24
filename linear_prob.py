@@ -198,7 +198,7 @@ if __name__=="__main__":
         #train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2, agument=False)
     for indice in sub_indices:
         for i in indice:
-            train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,indice,data_path,0, target_sample=256*2, agument=False)
+            train_dataset,valid_dataset,test_dataset = per_user_IMWUTdata(i,indice,data_path,0, target_sample=256*2, agument=False)
             global max_epochs
             global steps_per_epoch
             global max_lr
