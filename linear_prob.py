@@ -197,6 +197,9 @@ if __name__=="__main__":
     #for i in sub_indices:
         #train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2, agument=False)
     for indice in sub_indices:
+        if len(indice<=10):
+            continue
+        user_acc = np.array([])
         for i in indice:
             train_dataset,valid_dataset,test_dataset = per_user_IMWUTdata(i,indice,data_path,0, target_sample=256*2, agument=False)
             global max_epochs
@@ -242,6 +245,7 @@ if __name__=="__main__":
             
             #print('Y:', test_dataset.y)
             print('accuracy',accuracy)
-            ACCURACY = np.append(ACCURACY,accuracy)
-            print('AVERAGE accuracy',np.mean(ACCURACY))
-        break
+            #ACCURACY = np.append(ACCURACY,accuracy)
+            user_acc = np.append(user_acc,accuracy)
+        ACCURACY = np.append(ACCURACY,np.mean(user_acc))
+        print('AVERAGE accuracy',np.mean(ACCURACY))
