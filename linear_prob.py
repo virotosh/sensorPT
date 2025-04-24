@@ -34,7 +34,7 @@ class LitSensorPT(pl.LightningModule):
                      'S1_D2 hbr', 'S3_D2 hbr', 'S4_D2 hbr', 'S3_D3 hbr', 'S5_D3 hbr', 'S3_D4 hbr', 'S4_D4 hbr', 'S5_D4 hbr', 'S6_D5 hbr',
                      'S8_D5 hbr', 'S6_D6 hbr', 'S8_D6 hbr', 'S9_D6 hbr', 'S8_D7 hbr', 'S7_D7 hbr', 'S8_D8 hbr', 'S9_D8 hbr', 'S10_D8 hbr']
         self.chans_num = len(use_channels_names)
-        self.num_class = 3
+        self.num_class = 4
 
         # init model
         target_encoder = SensorTransformerEncoder(
@@ -215,7 +215,7 @@ if __name__=="__main__":
         
             # init model
             model = LitSensorPT()
-            model.num_class = len(list(set(list(valid_dataset.y))))
+            #model.num_class = len(list(set(list(valid_dataset.y))))
         
             # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
             lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
