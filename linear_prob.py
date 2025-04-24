@@ -247,5 +247,6 @@ if __name__=="__main__":
             print('accuracy',accuracy)
             #ACCURACY = np.append(ACCURACY,accuracy)
             user_acc = np.append(user_acc,accuracy)
+            print('user_acc accuracy',np.mean(user_acc))
         ACCURACY = np.append(ACCURACY,np.mean(user_acc))
         print('AVERAGE accuracy',np.mean(ACCURACY))
