@@ -15,6 +15,74 @@ import torch
 from torch.utils.data import Dataset,DataLoader
 
 
+def per_user_IMWUTdata(sub,sub_indices,data_path,few_shot_number = 1, is_few_EA = False, target_sample=-1, use_avg=True, use_channels=None, agument=True):
+    source_test_x = []
+    source_test_y = []
+    for i in [sub]:
+        test_path = os.path.join(data_path,r'sub{}_Data.mat'.format(i))
+        test_data = sio.loadmat(test_path)
+        session_1_x = test_data['x_data']
+        session_1_y = test_data['y_data'].reshape(-1)
+        
+        source_test_x.extend(session_1_x)
+        source_test_y.extend(session_1_y)
+
+    test_x_1 = torch.FloatTensor(np.array(source_test_x))    
+    test_y_1 = torch.LongTensor(np.array(source_test_y))
+    if target_sample>0:
+        test_x_1 = temporal_interpolation(test_x_1, target_sample, use_avg=use_avg)
+    if use_channels is not None:
+        test_dataset = sensor_dataset(test_x_1[:,use_channels,:],test_y_1)
+    else:
+        test_dataset = sensor_dataset(test_x_1,test_y_1)
+
+
+    
+    source_train_x = []
+    source_train_y = []
+
+    
+    for i in sub_indices:
+        if i in [sub]:
+            continue
+        train_path = os.path.join(data_path,r'sub{}_Data.mat'.format(i))
+        train_data = sio.loadmat(train_path)
+        session_1_x = train_data['x_data']
+        session_1_y = train_data['y_data'].reshape(-1)
+        
+        source_train_x.extend(session_1_x)
+        source_train_y.extend(session_1_y)
+
+    train_x,valid_x,train_y,valid_y = train_test_split(source_train_x,source_train_y,test_size = 0.1,stratify = source_train_y)
+    
+    #augment
+    if agument:
+        for i in range(20):
+            train_x.extend(np.random.uniform(low=-1.0, high=1.0, size=(1,40,512)))
+            train_y.extend(np.random.randint(4, size=(1,1)).reshape(-1))
+        
+    source_train_x = torch.FloatTensor(np.array(train_x))
+    source_train_y = torch.LongTensor(np.array(train_y))
+
+    source_valid_x = torch.FloatTensor(np.array(valid_x))
+    source_valid_y = torch.LongTensor(np.array(valid_y))
+    
+    if target_sample>0:
+        source_train_x = temporal_interpolation(source_train_x, target_sample, use_avg=use_avg)
+        source_valid_x = temporal_interpolation(source_valid_x, target_sample, use_avg=use_avg)
+        
+    if use_channels is not None:
+        train_dataset = sensor_dataset(source_train_x[:,use_channels,:],source_train_y)
+    else:
+        train_dataset = sensor_dataset(source_train_x,source_train_y)
+    
+    if use_channels is not None:
+        valid_datset = sensor_dataset(source_valid_x[:,use_channels,:],source_valid_y)
+    else:
+        valid_datset = sensor_dataset(source_valid_x,source_valid_y)
+    
+    return train_dataset,valid_datset,test_dataset
+
 def leave_one_user_out_IMWUTdata(sub_indices,data_path,few_shot_number = 1, is_few_EA = False, target_sample=-1, use_avg=True, use_channels=None, agument=True):
     source_test_x = []
     source_test_y = []
