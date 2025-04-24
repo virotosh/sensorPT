@@ -178,3 +178,72 @@ users = []
 for u,e in user_epoch.items():
     users.append(e)
 print(list(users))
+
+
+
+
+
+
+if __name__=="__main__":
+    # load data
+    data_path = "IMWUT_exp2/"
+    ACCURACY = np.array([])
+    sub_indices = [[177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189], [142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157],  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]]
+    #for i in reversed(range(1,195)):
+        #train_dataset,valid_dataset,test_dataset = leave_one_user_out_IMWUTdata(i,data_path,0, target_sample=256*2, agument=True)
+    #for i in sub_indices:
+        #train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2, agument=False)
+    for indice in sub_indices:
+        if len(indice)<=10:
+            continue
+        user_acc = np.array([])
+        for i in indice:
+            train_dataset,valid_dataset,test_dataset = per_user_IMWUTdata(i,indice,data_path,0, target_sample=256*2, agument=False)
+            global max_epochs
+            global steps_per_epoch
+            global max_lr
+            print(train_dataset.y)
+            print(valid_dataset.y)
+            batch_size=64
+            
+            train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
+            valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
+            
+            max_epochs = 20
+            steps_per_epoch = math.ceil(len(train_loader) )
+            max_lr = 0.005
+        
+            # init model
+            #print(len(list(set(valid_dataset.y.tolist()))))
+            model = LitSensorPT(4)
+        
+            # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
+            lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
+            callbacks = [lr_monitor]
+            
+            trainer = pl.Trainer(accelerator='cuda',
+                                 precision='16-mixed',
+                                 max_epochs=max_epochs, 
+                                 callbacks=callbacks,
+                                 enable_checkpointing=True,
+                                 logger=[pl_loggers.TensorBoardLogger('./logs/', name="IMWUTtest_tb", version=f"subject{i}"), 
+                                         pl_loggers.CSVLogger('./logs/', name="IMWUTtest_csv")])
+        
+            trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
+    
+            # predict
+            _, logit = model(test_dataset.x)
+            print('Y hat',torch.argmax(logit,  dim=-1))
+            # accuracy
+            y = test_dataset.y
+            print('Y',y)
+            label = y.long()
+            accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
+            
+            #print('Y:', test_dataset.y)
+            print('accuracy',accuracy)
+            #ACCURACY = np.append(ACCURACY,accuracy)
+            user_acc = np.append(user_acc,accuracy)
+            print('user_acc accuracy',np.mean(user_acc))
+        ACCURACY = np.append(ACCURACY,np.mean(user_acc))
+        print('AVERAGE accuracy',np.mean(ACCURACY))
