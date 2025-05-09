@@ -252,6 +252,9 @@ if __name__=="__main__":
         train_dataset.y=train_dataset.y[r]
         r=torch.randperm(valid_dataset.y.size(dim=-1))
         valid_dataset.y=valid_dataset.y[r]
+        
+        print(train_dataset.y)
+        print(valid_dataset.y)
 
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
