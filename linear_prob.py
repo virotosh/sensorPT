@@ -201,18 +201,16 @@ if __name__=="__main__":
         global steps_per_epoch
         global max_lr
         batch_size=64
+        max_epochs = 1
+        max_lr = 0.01
         
         print(train_dataset.y)
         print(valid_dataset.y)
-        r=torch.randperm(train_dataset.y.size(dim=-1))
-        print(train_dataset.y[r])
         
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 1
         steps_per_epoch = math.ceil(len(train_loader) )
-        max_lr = 0.01
     
         # init model
         #print(len(list(set(valid_dataset.y.tolist()))))
@@ -245,3 +243,46 @@ if __name__=="__main__":
         print('accuracy',accuracy)
         ACCURACY = np.append(ACCURACY,accuracy)
         print('AVERAGE accuracy',np.mean(ACCURACY))
+
+
+        ##### PERMU
+        ###########
+        
+        r=torch.randperm(train_dataset.y.size(dim=-1))
+        train_dataset.y=train_dataset.y[r]
+        r=torch.randperm(valid_dataset.y.size(dim=-1))
+        valid_dataset.y=valid_dataset.y[r]
+
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
+        valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
+        
+        steps_per_epoch = math.ceil(len(train_loader) )
+    
+        # init model
+        model = LitSensorPT()
+    
+        # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
+        lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
+        callbacks = [lr_monitor]
+        
+        trainer = pl.Trainer(accelerator='cuda',
+                             precision='16-mixed',
+                             max_epochs=max_epochs, 
+                             callbacks=callbacks,
+                             enable_checkpointing=True,
+                             logger=[pl_loggers.TensorBoardLogger('./logs/', name="IMWUTtest_tb", version=f"subject{i}"), 
+                                     pl_loggers.CSVLogger('./logs/', name="IMWUTtest_csv")])
+    
+        trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
+
+        # predict
+        _, logit = model(test_dataset.x)
+        y = test_dataset.y
+        label = y.long()
+        accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
+        
+        #print('Y:', test_dataset.y)
+        print('PERMUTED accuracy',accuracy)
+        per_ACCURACY = np.append(per_ACCURACY,accuracy)
+        print('PERMUTED AVERAGE accuracy',np.mean(per_ACCURACY))
+        
