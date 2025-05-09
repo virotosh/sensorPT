@@ -204,7 +204,7 @@ if __name__=="__main__":
         
         print(train_dataset.y)
         print(valid_dataset.y)
-        r=torch.randperm(train_dataset.y.size(dim=1))
+        r=torch.randperm(train_dataset.y.size(dim=-1))
         print(train_dataset.y[r])
         
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
