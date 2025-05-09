@@ -242,6 +242,7 @@ if __name__=="__main__":
         #print('Y:', test_dataset.y)
         print('accuracy',accuracy)
         ACCURACY = np.append(ACCURACY,accuracy)
+        print(ACCURACY)
         print('AVERAGE accuracy',np.mean(ACCURACY))
 
 
@@ -290,5 +291,6 @@ if __name__=="__main__":
         #print('Y:', test_dataset.y)
         print('PERMUTED accuracy',accuracy)
         per_ACCURACY = np.append(per_ACCURACY,accuracy)
+        print(per_ACCURACY)
         print('PERMUTED AVERAGE accuracy',np.mean(per_ACCURACY))
         
