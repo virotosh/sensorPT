@@ -201,8 +201,8 @@ if __name__=="__main__":
         global steps_per_epoch
         global max_lr
         batch_size=64
-        max_epochs = 1
-        max_lr = 0.005
+        max_epochs = 10
+        max_lr = 0.0001
         
         print(train_dataset.y)
         print(valid_dataset.y)
