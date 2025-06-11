@@ -21,13 +21,14 @@ class LitSensorPT(pl.LightningModule):
     def __init__(self):
         super().__init__()    
         
-        use_channels_names = ['S1_D1 hbo', 'S1_D1 hbr', 'S2_D1 hbo', 'S2_D1 hbr', 'S3_D1 hbo', 'S3_D1 hbr',
-                     'S1_D2 hbo', 'S1_D2 hbr', 'S3_D2 hbo', 'S3_D2 hbr', 'S4_D2 hbo', 'S4_D2 hbr', 'S2_D3 hbo',
-                     'S2_D3 hbr', 'S3_D3 hbo', 'S3_D3 hbr', 'S5_D3 hbo', 'S5_D3 hbr', 'S3_D4 hbo', 'S3_D4 hbr',
-                     'S4_D4 hbo', 'S4_D4 hbr', 'S5_D4 hbo', 'S5_D4 hbr', 'S6_D5 hbo', 'S6_D5 hbr', 'S7_D5 hbo',
-                     'S7_D5 hbr', 'S8_D5 hbo', 'S8_D5 hbr', 'S6_D6 hbo', 'S6_D6 hbr', 'S8_D6 hbo', 'S8_D6 hbr',
-                     'S9_D6 hbo', 'S9_D6 hbr', 'S7_D7 hbo', 'S7_D7 hbr', 'S8_D7 hbo', 'S8_D7 hbr', 'S10_D7 hbo',
-                     'S10_D7 hbr', 'S8_D8 hbo', 'S8_D8 hbr', 'S9_D8 hbo', 'S9_D8 hbr', 'S10_D8 hbo', 'S10_D8 hbr']
+        #use_channels_names = ['S1_D1 hbo', 'S1_D1 hbr', 'S2_D1 hbo', 'S2_D1 hbr', 'S3_D1 hbo', 'S3_D1 hbr',
+        #             'S1_D2 hbo', 'S1_D2 hbr', 'S3_D2 hbo', 'S3_D2 hbr', 'S4_D2 hbo', 'S4_D2 hbr', 'S2_D3 hbo',
+        #             'S2_D3 hbr', 'S3_D3 hbo', 'S3_D3 hbr', 'S5_D3 hbo', 'S5_D3 hbr', 'S3_D4 hbo', 'S3_D4 hbr',
+        #             'S4_D4 hbo', 'S4_D4 hbr', 'S5_D4 hbo', 'S5_D4 hbr', 'S6_D5 hbo', 'S6_D5 hbr', 'S7_D5 hbo',
+        #             'S7_D5 hbr', 'S8_D5 hbo', 'S8_D5 hbr', 'S6_D6 hbo', 'S6_D6 hbr', 'S8_D6 hbo', 'S8_D6 hbr',
+        #             'S9_D6 hbo', 'S9_D6 hbr', 'S7_D7 hbo', 'S7_D7 hbr', 'S8_D7 hbo', 'S8_D7 hbr', 'S10_D7 hbo',
+        #             'S10_D7 hbr', 'S8_D8 hbo', 'S8_D8 hbr', 'S9_D8 hbo', 'S9_D8 hbr', 'S10_D8 hbo', 'S10_D8 hbr']
+        use_channels_names = ['ACC0','ACC1','ACC2','BVP','HR','EDA','TEMP']
         self.chans_num = len(use_channels_names)
         self.num_class = 2
 
@@ -52,7 +53,7 @@ class LitSensorPT(pl.LightningModule):
         
         # -- load checkpoint
         #load_path="./logs/sensor_large_1.ckpt"
-        load_path="./data/pretrained_NEMO.ckpt"
+        load_path="./data/pretrained_full.ckpt"
         pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cuda"))
         
         target_encoder_stat = {}
@@ -66,7 +67,7 @@ class LitSensorPT(pl.LightningModule):
         self.chan_conv       = Conv1dWithConstraint(self.chans_num, self.chans_num, 1, max_norm=1)
         
         self.linear_probe1   = LinearWithConstraint(2048, 64, max_norm=1)
-        self.drop            = torch.nn.Dropout(p=0.8)        
+        self.drop            = torch.nn.Dropout(p=0.2)        
         self.decoder         = torch.nn.TransformerDecoder(
                                     decoder_layer=torch.nn.TransformerDecoderLayer(64, 4, 64*4, activation=torch.nn.functional.gelu, batch_first=False),
                                     num_layers=4
@@ -195,25 +196,26 @@ class LitSensorPT(pl.LightningModule):
 
 if __name__=="__main__":
     # load data
-    data_path = "IMWUT_data/"
+    #data_path = "IMWUT_data/"
+    data_path = "/projappl/project_2014260/data/wesadTest"
     ACCURACY = []
-    for i in reversed(range(1,73)):
+    for i in [2,3,4,5,6,7,8,9,10,11,13,14,15,16,17]: #reversed(range(1,73)):
         all_subjects = [i]
         all_datas = []
         train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2, agument=False)
         global max_epochs
         global steps_per_epoch
         global max_lr
-        print(train_dataset.y)
-        print(valid_dataset.y)
+        #print(train_dataset.y)
+        #print(valid_dataset.y)
         batch_size=64
         
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
         
-        max_epochs = 1
+        max_epochs = 100
         steps_per_epoch = math.ceil(len(train_loader) )
-        max_lr = 1e-4
+        max_lr = 5e-5
     
         # init model
         model = LitSensorPT()
@@ -226,7 +228,7 @@ if __name__=="__main__":
                              precision='16-mixed',
                              max_epochs=max_epochs, 
                              callbacks=callbacks,
-                             enable_checkpointing=True,
+                             enable_checkpointing=False,
                              logger=[pl_loggers.TensorBoardLogger('./logs/', name="IMWUTtest_tb", version=f"subject{i}"), 
                                      pl_loggers.CSVLogger('./logs/', name="IMWUTtest_csv")])
     
@@ -245,5 +247,5 @@ if __name__=="__main__":
         print('accuracy',accuracy)
         ACCURACY = np.append(ACCURACY,accuracy)
         print('AVERAGE accuracy',np.mean(ACCURACY))
-
+        #break
         

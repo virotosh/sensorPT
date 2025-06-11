@@ -152,11 +152,12 @@ def leave_one_user_out_IMWUTdata(sub_indices,data_path,few_shot_number = 1, is_f
     return train_dataset,valid_datset,test_dataset
 
 def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_sample=-1, use_avg=True, use_channels=None, agument=True):
-    target_session_1_path = os.path.join(data_path,r'sub{}_Data.mat'.format(sub))
+    target_session_1_path = os.path.join(data_path,r'sub_S{}_Data.mat'.format(sub))
     session_1_data = sio.loadmat(target_session_1_path)
     session_1_x = session_1_data['x_data']
-    test_x_1 = torch.FloatTensor(session_1_x)      
-    test_y_1 = torch.LongTensor(session_1_data['y_data']).reshape(-1)
+    test_x_1 = torch.FloatTensor(session_1_x)
+    test_x_1 = test_x_1[:,:7]      
+    test_y_1 = torch.LongTensor(session_1_data['y_data']).reshape(-1)[:]
     if target_sample>0:
         test_x_1 = temporal_interpolation(test_x_1, target_sample, use_avg=use_avg)
     if use_channels is not None:
@@ -168,14 +169,13 @@ def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_s
     source_train_y = []
 
     
-    for i in range(1,195):
+    for i in [2,3,4,5,6,7,8,9,10,11,13,14,15,16,17]: #range(1,195):
         if i == sub:
             continue
-        train_path = os.path.join(data_path,r'sub{}_Data.mat'.format(i))
+        train_path = os.path.join(data_path,r'sub_S{}_Data.mat'.format(i))
         train_data = sio.loadmat(train_path)
         session_1_x = train_data['x_data']
         session_1_y = train_data['y_data'].reshape(-1)
-        
         source_train_x.extend(session_1_x)
         source_train_y.extend(session_1_y)
     train_x,valid_x,train_y,valid_y = train_test_split(source_train_x,source_train_y,test_size = 0.1,stratify = source_train_y)
@@ -183,13 +183,13 @@ def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_s
     #augment
     if agument:
         for i in range(30):
-            train_x.extend(np.random.uniform(low=-1.0, high=1.0, size=(1,40,512)))
-            train_y.extend(np.random.randint(4, size=(1,1)).reshape(-1))
+            train_x.extend(np.random.uniform(low=-1.0, high=1.0, size=(1,15,512)))
+            train_y.extend(np.random.randint(2, size=(1,1)).reshape(-1))
         
-    source_train_x = torch.FloatTensor(np.array(train_x))
+    source_train_x = torch.FloatTensor(np.array(train_x))[:,:7]
     source_train_y = torch.LongTensor(np.array(train_y))
 
-    source_valid_x = torch.FloatTensor(np.array(valid_x))
+    source_valid_x = torch.FloatTensor(np.array(valid_x))[:,:7]
     source_valid_y = torch.LongTensor(np.array(valid_y))
     
     if target_sample>0:

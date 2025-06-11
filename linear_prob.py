@@ -29,13 +29,16 @@ class LitSensorPT(pl.LightningModule):
         #             'S7_D5 hbr', 'S8_D5 hbo', 'S8_D5 hbr', 'S6_D6 hbo', 'S6_D6 hbr', 'S8_D6 hbo', 'S8_D6 hbr',
         #             'S9_D6 hbo', 'S9_D6 hbr', 'S7_D7 hbo', 'S7_D7 hbr', 'S8_D7 hbo', 'S8_D7 hbr', 'S10_D7 hbo',
         #             'S10_D7 hbr', 'S8_D8 hbo', 'S8_D8 hbr', 'S9_D8 hbo', 'S9_D8 hbr', 'S10_D8 hbo', 'S10_D8 hbr']
-        use_channels_names = ['S2_D1 hbo', 'S3_D1 hbo', 'S1_D2 hbo', 'S3_D2 hbo',
-                     'S4_D2 hbo', 'S3_D3 hbo', 'S5_D3 hbo', 'S3_D4 hbo', 'S4_D4 hbo', 'S5_D4 hbo', 'S6_D5 hbo', 'S8_D5 hbo', 'S6_D6 hbo',
-                     'S8_D6 hbo', 'S9_D6 hbo', 'S8_D7 hbo', 'S7_D7 hbo', 'S8_D8 hbo', 'S9_D8 hbo', 'S10_D8 hbo', 'S2_D1 hbr', 'S3_D1 hbr',
-                     'S1_D2 hbr', 'S3_D2 hbr', 'S4_D2 hbr', 'S3_D3 hbr', 'S5_D3 hbr', 'S3_D4 hbr', 'S4_D4 hbr', 'S5_D4 hbr', 'S6_D5 hbr',
-                     'S8_D5 hbr', 'S6_D6 hbr', 'S8_D6 hbr', 'S9_D6 hbr', 'S8_D7 hbr', 'S7_D7 hbr', 'S8_D8 hbr', 'S9_D8 hbr', 'S10_D8 hbr']
+        #use_channels_names = ['S2_D1 hbo', 'S3_D1 hbo', 'S1_D2 hbo', 'S3_D2 hbo',
+        #             'S4_D2 hbo', 'S3_D3 hbo', 'S5_D3 hbo', 'S3_D4 hbo', 'S4_D4 hbo', 'S5_D4 hbo', 'S6_D5 hbo', 'S8_D5 hbo', 'S6_D6 hbo',
+        #             'S8_D6 hbo', 'S9_D6 hbo', 'S8_D7 hbo', 'S7_D7 hbo', 'S8_D8 hbo', 'S9_D8 hbo', 'S10_D8 hbo', 'S2_D1 hbr', 'S3_D1 hbr',
+        #             'S1_D2 hbr', 'S3_D2 hbr', 'S4_D2 hbr', 'S3_D3 hbr', 'S5_D3 hbr', 'S3_D4 hbr', 'S4_D4 hbr', 'S5_D4 hbr', 'S6_D5 hbr',
+        #             'S8_D5 hbr', 'S6_D6 hbr', 'S8_D6 hbr', 'S9_D6 hbr', 'S8_D7 hbr', 'S7_D7 hbr', 'S8_D8 hbr', 'S9_D8 hbr', 'S10_D8 hbr']
+        use_channels_names = ['ACC0','ACC1','ACC2','BVP','HR','EDA','TEMP']
+        #use_channels_names = ['EDA','HR','TEMP','EMG','Resp','EDA1','HR1','TEMP1','EMG1','Resp1',
+        #                        'EDA2','HR2','TEMP2','EMG2','Resp2']
         self.chans_num = len(use_channels_names)
-        self.num_class = 4
+        self.num_class = 2
 
         # init model
         target_encoder = SensorTransformerEncoder(
@@ -58,7 +61,7 @@ class LitSensorPT(pl.LightningModule):
         
         # -- load checkpoint
         #load_path="./logs/sensor_large_1.ckpt"
-        load_path="./data/pretrained_NEMO.ckpt"
+        load_path="./data/pretrained_full.ckpt"
         pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cuda"))
         
         target_encoder_stat = {}
@@ -74,7 +77,7 @@ class LitSensorPT(pl.LightningModule):
         self.linear_probe1   =   LinearWithConstraint(2048, 8, max_norm=1)
         self.linear_probe2   =   LinearWithConstraint(8*8, self.num_class, max_norm=0.25)
         
-        self.drop           = torch.nn.Dropout(p=0.9)
+        self.drop           = torch.nn.Dropout(p=0.5)
         
         self.loss_fn        = torch.nn.CrossEntropyLoss()
         self.running_scores = {"train":[], "valid":[], "test":[]}
@@ -83,7 +86,7 @@ class LitSensorPT(pl.LightningModule):
     def forward(self, x):
         # print(x.shape) # B, C, T
         #B, C, T = x.shape
-        x = x/10
+        #x = x/10
         #x = temporal_interpolation(x, 256*2)
         x = self.chan_conv(x)
         self.target_encoder.eval()
@@ -134,11 +137,13 @@ class LitSensorPT(pl.LightningModule):
             y_score.append(y)
         label = torch.cat(label, dim=0)
         y_score = torch.cat(y_score, dim=0)
-        print(label.shape, y_score.shape)
+        #print(label.shape, y_score.shape)
         
         metrics = ["accuracy", "balanced_accuracy", "cohen_kappa", "f1_weighted", "f1_macro", "f1_micro"]
         results = get_metrics(y_score.cpu().numpy(), label.cpu().numpy(), metrics, False)
-        
+        #metrics = ["accuracy", "balanced_accuracy", "precision", "recall", "cohen_kappa", "f1", "roc_auc"]
+        #results = get_metrics(y_score.cpu().numpy(), label.cpu().numpy(), metrics, True)
+
         for key, value in results.items():
             self.log('valid_'+key, value, on_epoch=True, on_step=False, sync_dist=True)
         return super().on_validation_epoch_end()
@@ -190,24 +195,25 @@ class LitSensorPT(pl.LightningModule):
 
 if __name__=="__main__":
     # load data
-    data_path = "IMWUT_exp2/"
+    #data_path = "IMWUT_exp2/"
+    data_path = "/projappl/project_2014260/data/wesadTest"
     ACCURACY = np.array([])
     per_ACCURACY = np.array([])
     rnd_ACCURACY = np.array([])
     sub_indices = [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21], [22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38], [39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65], [66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82], [83, 84, 85, 86, 87, 88], [89, 90, 91, 92, 93, 94, 95, 96, 97, 98], [99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111], [112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125], [126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141], [142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157], [158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176], [177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189], [190, 191, 192, 193, 194]]
     #for i in sub_indices:
         #train_dataset,valid_dataset,test_dataset = leave_one_user_out_IMWUTdata(i,data_path,0, target_sample=256*2, agument=True)
-    for i in reversed(range(1,195)):
-        train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2, agument=True)
+    for i in [2,3,4,5,6,7,8,9,10,11,13,14,15,16,17]: #reversed(range(1,195)):
+        train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2, agument=False)
         global max_epochs
         global steps_per_epoch
         global max_lr
         batch_size=64
-        max_epochs = 100
-        max_lr = 0.0005
+        max_epochs = 50
+        max_lr = 0.0001
         
-        print(train_dataset.y)
-        print(valid_dataset.y)
+        #print(train_dataset.y)
+        #print(valid_dataset.y)
         
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
@@ -237,7 +243,7 @@ if __name__=="__main__":
         print('Y hat',torch.argmax(logit,  dim=-1))
         # accuracy
         y = test_dataset.y
-        print('Y',y)
+        #print('Y',y)
         label = y.long()
         accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
         
@@ -256,8 +262,8 @@ if __name__=="__main__":
         r=torch.randperm(valid_dataset.y.size(dim=-1))
         valid_dataset.y=valid_dataset.y[r]
         
-        print(train_dataset.y)
-        print(valid_dataset.y)
+        #print(train_dataset.y)
+        #print(valid_dataset.y)
 
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
         valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
@@ -283,10 +289,10 @@ if __name__=="__main__":
 
         # predict
         _, logit = model(test_dataset.x)
-        print('PERMUTED Y hat',torch.argmax(logit,  dim=-1))
+        #print('PERMUTED Y hat',torch.argmax(logit,  dim=-1))
         # accuracy
         y = test_dataset.y
-        print('PERMUTED Y',y)
+        #print('PERMUTED Y',y)
         label = y.long()
         accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
         
@@ -306,4 +312,4 @@ if __name__=="__main__":
         rnd_ACCURACY = np.append(rnd_ACCURACY,accuracy)
         print(rnd_ACCURACY)
         print('RND AVERAGE accuracy',np.mean(rnd_ACCURACY))
-        
+        break

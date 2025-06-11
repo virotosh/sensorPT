@@ -21,6 +21,6 @@ if __name__=="__main__":
     #                     logger=[pl_loggers.TensorBoardLogger('./logs/', name=f"sensorPT_{tag}_{variant}_tb"), 
     #                             pl_loggers.CSVLogger('./logs/', name=f"sensorPT_{tag}_{variant}_csv")])
     trainer = pl.Trainer(strategy='auto', devices=devices, max_epochs=max_epochs, callbacks=callbacks,
-                         logger=[pl_loggers.TensorBoardLogger('./logs/', name=f"sensorPT_nemo_tb"), 
-                                 pl_loggers.CSVLogger('./logs/', name=f"sensorPT_nemo_csv")])
+                         logger=[pl_loggers.TensorBoardLogger('./logs/', name=f"sensorPT_empatica_tb"), 
+                                 pl_loggers.CSVLogger('./logs/', name=f"sensorPT_empatica_csv")])
     trainer.fit(model, train_loader, valid_loader)
