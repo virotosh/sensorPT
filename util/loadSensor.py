@@ -152,7 +152,9 @@ def leave_one_user_out_IMWUTdata(sub_indices,data_path,few_shot_number = 1, is_f
     return train_dataset,valid_datset,test_dataset
 
 def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_sample=-1, use_avg=True, use_channels=None, agument=True):
-    target_session_1_path = os.path.join(data_path,r'sub_S{}_Data.mat'.format(sub))
+    for root, dirs, files in os.walk(data_path):
+        subs = sorted(files)
+    target_session_1_path = os.path.join(data_path,sub) #r'sub_S{}_Data.mat'.format(sub))
     session_1_data = sio.loadmat(target_session_1_path)
     session_1_x = session_1_data['x_data']
     test_x_1 = torch.FloatTensor(session_1_x)
@@ -169,16 +171,16 @@ def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_s
     source_train_y = []
 
     
-    for i in [2,3,4,5,6,7,8,9,10,11,13,14,15,16,17]: #range(1,195):
+    for i in subs: #[2,3,4,5,6,7,8,9,10,11,13,14,15,16,17]: #subs:
         if i == sub:
             continue
-        train_path = os.path.join(data_path,r'sub_S{}_Data.mat'.format(i))
+        train_path = os.path.join(data_path,i) #r'sub_S{}_Data.mat'.format(i))
         train_data = sio.loadmat(train_path)
         session_1_x = train_data['x_data']
         session_1_y = train_data['y_data'].reshape(-1)
         source_train_x.extend(session_1_x)
         source_train_y.extend(session_1_y)
-    train_x,valid_x,train_y,valid_y = train_test_split(source_train_x,source_train_y,test_size = 0.1,stratify = source_train_y)
+    train_x,valid_x,train_y,valid_y = train_test_split(source_train_x,source_train_y,test_size = 0.1,stratify = source_train_y, random_state=0)
     
     #augment
     if agument:

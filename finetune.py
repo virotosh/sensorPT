@@ -215,7 +215,7 @@ if __name__=="__main__":
         
         max_epochs = 100
         steps_per_epoch = math.ceil(len(train_loader) )
-        max_lr = 5e-5
+        max_lr = 1e-4
     
         # init model
         model = LitSensorPT()

@@ -2,6 +2,8 @@ import torch
 import math
 from torch import nn
 import pytorch_lightning as pl
+import sys
+import os
 
 from functools import partial
 import numpy as np
@@ -19,7 +21,7 @@ seed_torch(7)
 
 class LitSensorPT(pl.LightningModule):
     
-    def __init__(self, ckpt):
+    def __init__(self, ckptPATH):
         super().__init__()    
 
         #use_channels_names = ['S1_D1 hbo', 'S1_D1 hbr', 'S2_D1 hbo', 'S2_D1 hbr', 'S3_D1 hbo', 'S3_D1 hbr',
@@ -61,7 +63,7 @@ class LitSensorPT(pl.LightningModule):
         
         # -- load checkpoint
         #load_path="./logs/sensor_large_1.ckpt"
-        load_path=ckpt
+        load_path=ckptPATH
         pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cuda"))
         
         target_encoder_stat = {}
@@ -160,10 +162,10 @@ class LitSensorPT(pl.LightningModule):
         # Logging to TensorBoard by default
         self.log('valid_loss', loss, on_epoch=True, on_step=False)
         self.log('valid_acc', accuracy, on_epoch=True, on_step=False)
-        
+
 #        self.running_scores["valid"].append((label.clone().detach().cpu(), logit.clone().detach().cpu()))
 #        return loss
-        
+
         y_score =  logit
         y_score =  torch.softmax(y_score, dim=-1)[:,1]
         self.running_scores["valid"].append((label.clone().detach().cpu(), y_score.clone().detach().cpu()))
@@ -191,123 +193,131 @@ class LitSensorPT(pl.LightningModule):
         return (
             {'optimizer': optimizer, 'lr_scheduler': lr_dict},
         )
-        
+
 
 if __name__=="__main__":
     # load data
-    #data_path = "IMWUT_exp2/"
     data_path = "/projappl/project_2014260/data/wesadTest"
-    ACCURACY = np.array([])
-    per_ACCURACY = np.array([])
-    rnd_ACCURACY = np.array([])
-    for i in [2,3,4,5,6,7,8,9,10,11,13,14,15,16,17]: #reversed(range(1,195)):
-        train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2, agument=False)
-        global max_epochs
-        global steps_per_epoch
-        global max_lr
-        batch_size=64
-        max_epochs =200
-        max_lr = 45e-4
+    for root, dirs, files in os.walk("/projappl/project_2014260/data/wesadTest"):
+        subs = sorted(files)
+    #ckptID = sys.argv[1]
+    model_ACCURACY = []
+    for ckptID in range(1,2):
+        print('CHECKPOINT:',f"/scratch/project_2014260/pretrained_full{ckptID}.ckpt")
+        ACCURACY = np.array([])
+        per_ACCURACY = np.array([])
+        rnd_ACCURACY = np.array([])
+        for i in subs:
+            print('-----',i)
+            train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2, agument=False)
+            global max_epochs
+            global steps_per_epoch
+            global max_lr
+            batch_size=64
+            max_epochs =200
+            max_lr = 45e-4
+            
+            #print(train_dataset.y)
+            #print(valid_dataset.y)
+            
+            train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
+            valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
+            
+            steps_per_epoch = math.ceil(len(train_loader) )
         
-        #print(train_dataset.y)
-        #print(valid_dataset.y)
+            # init model
+            model = LitSensorPT(ckptPATH=f"/scratch/project_2014260/pretrained_full{ckptID}.ckpt")
         
-        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
-        valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
+            # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
+            lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
+            callbacks = [lr_monitor]
+
+            trainer = pl.Trainer(accelerator='cuda',
+                                 precision='16-mixed',
+                                 max_epochs=max_epochs, 
+                                 callbacks=callbacks,
+                                 enable_checkpointing=False,
+                                 logger=[pl_loggers.TensorBoardLogger('./logs/', name="IMWUTtest_tb", version=f"subject{i}"), 
+                                         pl_loggers.CSVLogger('./logs/', name="IMWUTtest_csv")])
         
-        steps_per_epoch = math.ceil(len(train_loader) )
+            trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
     
-        # init model
-        #print(len(list(set(valid_dataset.y.tolist()))))
-        model = LitSensorPT(ckpt="./data/pretrained_full.ckpt")
+            # predict
+            _, logit = model(test_dataset.x)
+            print('Y hat',torch.argmax(logit,  dim=-1))
+            # accuracy
+            y = test_dataset.y
+            #print('Y',y)
+            label = y.long()
+            accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
+            
+            print('accuracy',accuracy)
+            ACCURACY = np.append(ACCURACY,accuracy)
+            print(ACCURACY)
+            print('AVERAGE accuracy',np.mean(ACCURACY))
+
+            continue
+            
+            ##### PERMU
+            ###########
+            
+            r=torch.randperm(train_dataset.y.size(dim=-1))
+            train_dataset.y=train_dataset.y[r]
+            r=torch.randperm(valid_dataset.y.size(dim=-1))
+            valid_dataset.y=valid_dataset.y[r]
+            
+            #print(train_dataset.y)
+            #print(valid_dataset.y)
     
-        # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
-        lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
-        callbacks = [lr_monitor]
+            train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
+            valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
+            
+            steps_per_epoch = math.ceil(len(train_loader) )
         
-        trainer = pl.Trainer(accelerator='cuda',
-                             precision='16-mixed',
-                             max_epochs=max_epochs, 
-                             callbacks=callbacks,
-                             enable_checkpointing=False,
-                             logger=[pl_loggers.TensorBoardLogger('./logs/', name="IMWUTtest_tb", version=f"subject{i}"), 
-                                     pl_loggers.CSVLogger('./logs/', name="IMWUTtest_csv")])
+            # init model
+            model = LitSensorPT(ckptPATH=f"/scratch/project_2014260/pretrained_full{ckptID}.ckpt")
+        
+            # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
+            lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
+            callbacks = [lr_monitor]
+            
+            trainer = pl.Trainer(accelerator='cuda',
+                                 precision='16-mixed',
+                                 max_epochs=max_epochs, 
+                                 callbacks=callbacks,
+                                 enable_checkpointing=False,
+                                 logger=[pl_loggers.TensorBoardLogger('./logs/', name="IMWUTtest_tb", version=f"subject{i}"), 
+                                         pl_loggers.CSVLogger('./logs/', name="IMWUTtest_csv")])
+        
+            trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
     
-        trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
-
-        # predict
-        _, logit = model(test_dataset.x)
-        print('Y hat',torch.argmax(logit,  dim=-1))
-        # accuracy
-        y = test_dataset.y
-        #print('Y',y)
-        label = y.long()
-        accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
-        
-        #print('Y:', test_dataset.y)
-        print('accuracy',accuracy)
-        ACCURACY = np.append(ACCURACY,accuracy)
-        print(ACCURACY)
-        print('AVERAGE accuracy',np.mean(ACCURACY))
-
-        continue
-        
-        ##### PERMU
-        ###########
-        
-        r=torch.randperm(train_dataset.y.size(dim=-1))
-        train_dataset.y=train_dataset.y[r]
-        r=torch.randperm(valid_dataset.y.size(dim=-1))
-        valid_dataset.y=valid_dataset.y[r]
-        
-        #print(train_dataset.y)
-        #print(valid_dataset.y)
-
-        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
-        valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
-        
-        steps_per_epoch = math.ceil(len(train_loader) )
+            # predict
+            _, logit = model(test_dataset.x)
+            #print('PERMUTED Y hat',torch.argmax(logit,  dim=-1))
+            # accuracy
+            y = test_dataset.y
+            #print('PERMUTED Y',y)
+            label = y.long()
+            accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
+            
+            #print('Y:', test_dataset.y)
+            print('PERMUTED accuracy',accuracy)
+            per_ACCURACY = np.append(per_ACCURACY,accuracy)
+            print(per_ACCURACY)
+            print('PERMUTED AVERAGE accuracy',np.mean(per_ACCURACY))
     
-        # init model
-        model = LitSensorPT(ckpt="./data/pretrained_full.ckpt")
     
-        # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
-        lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
-        callbacks = [lr_monitor]
-        
-        trainer = pl.Trainer(accelerator='cuda',
-                             precision='16-mixed',
-                             max_epochs=max_epochs, 
-                             callbacks=callbacks,
-                             enable_checkpointing=False,
-                             logger=[pl_loggers.TensorBoardLogger('./logs/', name="IMWUTtest_tb", version=f"subject{i}"), 
-                                     pl_loggers.CSVLogger('./logs/', name="IMWUTtest_csv")])
     
-        trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
-
-        # predict
-        _, logit = model(test_dataset.x)
-        #print('PERMUTED Y hat',torch.argmax(logit,  dim=-1))
-        # accuracy
-        y = test_dataset.y
-        #print('PERMUTED Y',y)
-        label = y.long()
-        accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
-        
-        #print('Y:', test_dataset.y)
-        print('PERMUTED accuracy',accuracy)
-        per_ACCURACY = np.append(per_ACCURACY,accuracy)
-        print(per_ACCURACY)
-        print('PERMUTED AVERAGE accuracy',np.mean(per_ACCURACY))
-
-
-
-        #### RANDOM
-        rnd_label = torch.tensor([random.randint(0, 1)])
-        rnd_label = rnd_label.long()
-        accuracy = ((rnd_label==label)*1.0).mean()
-        print('RND accuracy',accuracy)
-        rnd_ACCURACY = np.append(rnd_ACCURACY,accuracy)
-        print(rnd_ACCURACY)
-        print('RND AVERAGE accuracy',np.mean(rnd_ACCURACY))
-        #break
+            #### RANDOM
+            rnd_label = torch.tensor([random.randint(0, 1)])
+            rnd_label = rnd_label.long()
+            accuracy = ((rnd_label==label)*1.0).mean()
+            print('RND accuracy',accuracy)
+            rnd_ACCURACY = np.append(rnd_ACCURACY,accuracy)
+            print(rnd_ACCURACY)
+            print('RND AVERAGE accuracy',np.mean(rnd_ACCURACY))
+            #break
+        model_ACCURACY.append(ACCURACY.tolist())
+        print(model_ACCURACY)
+    #with open("./testfile.txt", "a") as file:
+    #    file.write(str(ACCURACY.tolist())+'\n')
