@@ -202,7 +202,7 @@ if __name__=="__main__":
         subs = sorted(files)
     #ckptID = sys.argv[1]
     model_ACCURACY = []
-    for ckptID in range(1,2):
+    for ckptID in range(100,101):
         print('CHECKPOINT:',f"/scratch/project_2014260/pretrained_full{ckptID}.ckpt")
         ACCURACY = np.array([])
         per_ACCURACY = np.array([])
