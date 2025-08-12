@@ -27,8 +27,8 @@ async def get_probs(request: Request):
     _, logit = model(test_dataset)
     print('Y hat',torch.argmax(logit,  dim=-1))
     probs = logit.detach().numpy()[0]
-    probs_norm = (probs - probs.min()) / (probs - probs.min()).sum()
-    res = dict(zip(["no stress","stress"], probs_norm))
+    #probs_norm = (probs - probs.min()) / (probs - probs.min()).sum()
+    res = dict(zip(["no stress","stress"], probs))
     
     return json.dumps(str(res))
 
