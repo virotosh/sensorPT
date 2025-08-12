@@ -22,7 +22,7 @@ def read_root():
 @app.post("/predict")
 async def get_probs(request: Request):
     _req = await request.json()
-    req = np.array(_req["eeg"], dtype="float32")
+    req = np.array(_req["empatica"], dtype="float32")
     test_dataset = torch.from_numpy(req)
     _, logit = model(test_dataset)
     probs = logit.detach().numpy()[0]
