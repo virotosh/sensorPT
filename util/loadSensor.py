@@ -3,7 +3,7 @@ import glob
 import numpy as np
 import scipy.io as sio
 import sys
-import mne
+#import mne
 
 import scipy.linalg
 import scipy.io
@@ -14,57 +14,109 @@ from sklearn.model_selection import train_test_split
 import torch
 from torch.utils.data import Dataset,DataLoader
 
+def get_leaveOneDatasetOut(testpath,trainpath,few_shot_number = 1, is_few_EA = False, target_sample=-1, use_avg=True, use_channels=None):
+    for root, dirs, files in os.walk(testpath):
+        test_subs = sorted(files)
 
-def per_user_IMWUTdata(sub,sub_indices,data_path,few_shot_number = 1, is_few_EA = False, target_sample=-1, use_avg=True, use_channels=None, agument=True):
     source_test_x = []
     source_test_y = []
-    for i in [sub]:
-        test_path = os.path.join(data_path,r'sub{}_Data.mat'.format(i))
-        test_data = sio.loadmat(test_path)
-        session_1_x = test_data['x_data']
-        session_1_y = test_data['y_data'].reshape(-1)
+    cutindex = 5
+    if testpath == f"/scratch/project_2014260/data/LOO_finetune/LOO3/test":
+        cutindex = 2
+    for i in test_subs[:cutindex]:
+        test_data = sio.loadmat( os.path.join(testpath,i) )
+        sub_x = test_data['x_data']
+        sub_y = test_data['y_data'].reshape(-1)
+        source_test_x.extend(sub_x)
+        source_test_y.extend(sub_y)
         
-        source_test_x.extend(session_1_x)
-        source_test_y.extend(session_1_y)
+    test_x = torch.FloatTensor(np.array(source_test_x))[:,:7]
+    test_y = torch.LongTensor(np.array(source_test_y))
+    
+    if target_sample>0:
+        test_x = temporal_interpolation(test_x, target_sample, use_avg=use_avg)
+    if use_channels is not None:
+        test_dataset = sensor_dataset(test_x[:,use_channels,:],test_y)
+    else:
+        test_dataset = sensor_dataset(test_x,test_y)
 
-    test_x_1 = torch.FloatTensor(np.array(source_test_x))    
-    test_y_1 = torch.LongTensor(np.array(source_test_y))
+    
+    source_train_x = []
+    source_train_y = []
+
+    for root, dirs, files in os.walk(trainpath):
+        train_subs = sorted(files)
+        
+    for i in train_subs:
+        train_data = sio.loadmat( os.path.join(trainpath,i) )
+        sub_x = train_data['x_data']
+        sub_y = train_data['y_data'].reshape(-1)
+        source_train_x.extend(sub_x)
+        source_train_y.extend(sub_y)
+    
+    train_x,valid_x,train_y,valid_y = train_test_split(source_train_x,source_train_y,test_size = 0.1,stratify = source_train_y, random_state=0)
+        
+    source_train_x = torch.FloatTensor(np.array(train_x))[:,:7]
+    source_train_y = torch.LongTensor(np.array(train_y))
+
+    source_valid_x = torch.FloatTensor(np.array(valid_x))[:,:7]
+    source_valid_y = torch.LongTensor(np.array(valid_y))
+    
+    if target_sample>0:
+        source_train_x = temporal_interpolation(source_train_x, target_sample, use_avg=use_avg)
+        source_valid_x = temporal_interpolation(source_valid_x, target_sample, use_avg=use_avg)
+        
+    if use_channels is not None:
+        train_dataset = sensor_dataset(source_train_x[:,use_channels,:],source_train_y)
+    else:
+        train_dataset = sensor_dataset(source_train_x,source_train_y)
+    
+    if use_channels is not None:
+        valid_datset = sensor_dataset(source_valid_x[:,use_channels,:],source_valid_y)
+    else:
+        valid_datset = sensor_dataset(source_valid_x,source_valid_y)
+    
+    return train_dataset,valid_datset,test_dataset
+    
+def get_percent_Mydata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_sample=-1, use_avg=True, use_channels=None,percent=100):
+    for root, dirs, files in os.walk(data_path):
+        subs = sorted(files)
+    target_session_1_path = os.path.join(data_path,sub)
+    session_1_data = sio.loadmat(target_session_1_path)
+    session_1_x = session_1_data['x_data']
+    test_x_1 = torch.FloatTensor(session_1_x)
+    test_x_1 = test_x_1[:,:7]      
+    test_y_1 = torch.LongTensor(session_1_data['y_data']).reshape(-1)[:]
     if target_sample>0:
         test_x_1 = temporal_interpolation(test_x_1, target_sample, use_avg=use_avg)
     if use_channels is not None:
         test_dataset = sensor_dataset(test_x_1[:,use_channels,:],test_y_1)
     else:
         test_dataset = sensor_dataset(test_x_1,test_y_1)
-
-
-    
+        
     source_train_x = []
     source_train_y = []
-
     
-    for i in sub_indices:
-        if i in [sub]:
+    for i in subs:
+        if i == sub:
             continue
-        train_path = os.path.join(data_path,r'sub{}_Data.mat'.format(i))
+        train_path = os.path.join(data_path,i)
         train_data = sio.loadmat(train_path)
         session_1_x = train_data['x_data']
         session_1_y = train_data['y_data'].reshape(-1)
-        
         source_train_x.extend(session_1_x)
         source_train_y.extend(session_1_y)
-
-    train_x,valid_x,train_y,valid_y = train_test_split(source_train_x,source_train_y,test_size = 0.1,stratify = source_train_y)
-    
-    #augment
-    if agument:
-        for i in range(20):
-            train_x.extend(np.random.uniform(low=-1.0, high=1.0, size=(1,40,512)))
-            train_y.extend(np.random.randint(4, size=(1,1)).reshape(-1))
+    print('*** Total no. data points:',len(source_train_x),len(source_train_y))
+    percentindex = int(len(source_train_x)*(percent/100))
+    source_train_x = source_train_x[:percentindex]   
+    source_train_y = source_train_y[:percentindex]
+    print('*** Percent for train linear prob:',percent,'% ; no. data points: x',len(source_train_x),'y',len(source_train_y))
+    train_x,valid_x,train_y,valid_y = train_test_split(source_train_x,source_train_y,test_size = 0.1,stratify = source_train_y, random_state=0)
         
-    source_train_x = torch.FloatTensor(np.array(train_x))
+    source_train_x = torch.FloatTensor(np.array(train_x))[:,:7]
     source_train_y = torch.LongTensor(np.array(train_y))
 
-    source_valid_x = torch.FloatTensor(np.array(valid_x))
+    source_valid_x = torch.FloatTensor(np.array(valid_x))[:,:7]
     source_valid_y = torch.LongTensor(np.array(valid_y))
     
     if target_sample>0:
@@ -83,56 +135,45 @@ def per_user_IMWUTdata(sub,sub_indices,data_path,few_shot_number = 1, is_few_EA 
     
     return train_dataset,valid_datset,test_dataset
 
-def leave_one_user_out_IMWUTdata(sub_indices,data_path,few_shot_number = 1, is_few_EA = False, target_sample=-1, use_avg=True, use_channels=None, agument=True):
-    source_test_x = []
-    source_test_y = []
-    for i in sub_indices:
-        test_path = os.path.join(data_path,r'sub{}_Data.mat'.format(i))
-        test_data = sio.loadmat(test_path)
-        session_1_x = test_data['x_data']
-        session_1_y = test_data['y_data'].reshape(-1)
-        
-        source_test_x.extend(session_1_x)
-        source_test_y.extend(session_1_y)
-
-    test_x_1 = torch.FloatTensor(np.array(source_test_x))    
-    test_y_1 = torch.LongTensor(np.array(source_test_y))
+def get_Mydata_excludeFeature(sub,data_path,few_shot_number = 1, is_few_EA = False, target_sample=-1, use_avg=True, use_channels=None, featureID=0):
+    for root, dirs, files in os.walk(data_path):
+        subs = sorted(files)
+    target_session_1_path = os.path.join(data_path,sub)
+    session_1_data = sio.loadmat(target_session_1_path)
+    session_1_x = session_1_data['x_data']
+    for iii in session_1_x:
+        iii[featureID]=[0.0 for f in range(len(iii[featureID]))]
+    test_x_1 = torch.FloatTensor(session_1_x)
+    test_x_1 = test_x_1[:,:7]      
+    test_y_1 = torch.LongTensor(session_1_data['y_data']).reshape(-1)[:]
     if target_sample>0:
         test_x_1 = temporal_interpolation(test_x_1, target_sample, use_avg=use_avg)
     if use_channels is not None:
         test_dataset = sensor_dataset(test_x_1[:,use_channels,:],test_y_1)
     else:
         test_dataset = sensor_dataset(test_x_1,test_y_1)
-
-
-    
+        
     source_train_x = []
     source_train_y = []
 
     
-    for i in range(1,195):
-        if i in sub_indices:
+    for i in subs:
+        if i == sub:
             continue
-        train_path = os.path.join(data_path,r'sub{}_Data.mat'.format(i))
+        train_path = os.path.join(data_path,i)
         train_data = sio.loadmat(train_path)
         session_1_x = train_data['x_data']
+        for iii in session_1_x:
+            iii[featureID]=[0.0 for f in range(len(iii[featureID]))]
         session_1_y = train_data['y_data'].reshape(-1)
-        
         source_train_x.extend(session_1_x)
         source_train_y.extend(session_1_y)
-
-    train_x,valid_x,train_y,valid_y = train_test_split(source_train_x,source_train_y,test_size = 0.1,stratify = source_train_y)
-    
-    #augment
-    if agument:
-        for i in range(80):
-            train_x.extend(np.random.uniform(low=-1.0, high=1.0, size=(1,40,512)))
-            train_y.extend(np.random.randint(4, size=(1,1)).reshape(-1))
+    train_x,valid_x,train_y,valid_y = train_test_split(source_train_x,source_train_y,test_size = 0.1,stratify = source_train_y, random_state=0)
         
-    source_train_x = torch.FloatTensor(np.array(train_x))
+    source_train_x = torch.FloatTensor(np.array(train_x))[:,:7]
     source_train_y = torch.LongTensor(np.array(train_y))
 
-    source_valid_x = torch.FloatTensor(np.array(valid_x))
+    source_valid_x = torch.FloatTensor(np.array(valid_x))[:,:7]
     source_valid_y = torch.LongTensor(np.array(valid_y))
     
     if target_sample>0:
@@ -150,8 +191,8 @@ def leave_one_user_out_IMWUTdata(sub_indices,data_path,few_shot_number = 1, is_f
         valid_datset = sensor_dataset(source_valid_x,source_valid_y)
     
     return train_dataset,valid_datset,test_dataset
-
-def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_sample=-1, use_avg=True, use_channels=None, agument=True):
+    
+def get_Mydata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_sample=-1, use_avg=True, use_channels=None):
     for root, dirs, files in os.walk(data_path):
         subs = sorted(files)
     target_session_1_path = os.path.join(data_path,sub) #r'sub_S{}_Data.mat'.format(sub))
@@ -181,12 +222,6 @@ def get_IMWUTdata(sub,data_path,few_shot_number = 1, is_few_EA = False, target_s
         source_train_x.extend(session_1_x)
         source_train_y.extend(session_1_y)
     train_x,valid_x,train_y,valid_y = train_test_split(source_train_x,source_train_y,test_size = 0.1,stratify = source_train_y, random_state=0)
-    
-    #augment
-    if agument:
-        for i in range(30):
-            train_x.extend(np.random.uniform(low=-1.0, high=1.0, size=(1,15,512)))
-            train_y.extend(np.random.randint(2, size=(1,1)).reshape(-1))
         
     source_train_x = torch.FloatTensor(np.array(train_x))[:,:7]
     source_train_y = torch.LongTensor(np.array(train_y))

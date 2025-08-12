@@ -4,7 +4,6 @@ from torch import nn
 import pytorch_lightning as pl
 import sys
 import os
-import pandas as pd
 
 from functools import partial
 import numpy as np
@@ -13,7 +12,7 @@ import torch.nn.functional as F
 import random
 
 from util.utils_eval import get_metrics
-from util.loadSensor import get_data, get_Mydata, get_percent_Mydata, temporal_interpolation, get_Mydata_excludeFeature, get_leaveOneDatasetOut
+from util.loadSensor import get_data, get_Mydata, temporal_interpolation, get_leaveOneDatasetOut
 
 from model.SensorTransformer import SensorTransformerEncoder
 from model.module import Conv1dWithConstraint, LinearWithConstraint
@@ -22,7 +21,7 @@ seed_torch(7)
 
 class LitSensorPT(pl.LightningModule):
     
-    def __init__(self, ckpt):
+    def __init__(self, ckptPATH):
         super().__init__()    
 
         #use_channels_names = ['S1_D1 hbo', 'S1_D1 hbr', 'S2_D1 hbo', 'S2_D1 hbr', 'S3_D1 hbo', 'S3_D1 hbr',
@@ -64,7 +63,7 @@ class LitSensorPT(pl.LightningModule):
         
         # -- load checkpoint
         #load_path="./logs/sensor_large_1.ckpt"
-        load_path=ckpt
+        load_path=ckptPATH
         pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cuda"))
         
         target_encoder_stat = {}
@@ -80,7 +79,7 @@ class LitSensorPT(pl.LightningModule):
         self.linear_probe1   =   LinearWithConstraint(2048, 8, max_norm=1)
         self.linear_probe2   =   LinearWithConstraint(8*8, self.num_class, max_norm=0.25)
         
-        self.drop           = torch.nn.Dropout(p=0.4)
+        self.drop           = torch.nn.Dropout(p=0.2)
         
         self.loss_fn        = torch.nn.CrossEntropyLoss()
         self.running_scores = {"train":[], "valid":[], "test":[]}
@@ -163,10 +162,10 @@ class LitSensorPT(pl.LightningModule):
         # Logging to TensorBoard by default
         self.log('valid_loss', loss, on_epoch=True, on_step=False)
         self.log('valid_acc', accuracy, on_epoch=True, on_step=False)
-        
+
 #        self.running_scores["valid"].append((label.clone().detach().cpu(), logit.clone().detach().cpu()))
 #        return loss
-        
+
         y_score =  logit
         y_score =  torch.softmax(y_score, dim=-1)[:,1]
         self.running_scores["valid"].append((label.clone().detach().cpu(), y_score.clone().detach().cpu()))
@@ -194,67 +193,66 @@ class LitSensorPT(pl.LightningModule):
         return (
             {'optimizer': optimizer, 'lr_scheduler': lr_dict},
         )
-        
+
 
 if __name__=="__main__":
-    LOO = 'LOO2'
     # load data
-    test_path = f"/scratch/project_2014260/data/LOO_finetune/{LOO}/test"
-    train_path = f"/scratch/project_2014260/data/LOO_finetune/{LOO}/finetune"
+    train_path = f"/scratch/project_2014260/data/LOO/LOO8/test"
+    LOOs = ['LOO1','LOO2','LOO3','LOO4','LOO5','LOO6','LOO7','LOO9','LOO10','LOO11','LOO12']
+    model_ACCURACY = []
+    for ckptID in range(100,101):
+        print('CHECKPOINT:',f"./logs/sensorPT_empatica_LOO1_tb/version_9/checkpoints/epoch=199-step=15400.ckpt")
+        ACCURACY = np.array([])
+        for l,LOO in enumerate(LOOs):
+            test_path = f"/scratch/project_2014260/data/LOO/{LOO}/test"
+            train_dataset,valid_dataset,test_dataset = get_leaveOneDatasetOut(test_path,train_path,0, target_sample=256*2)
+            print('train size',len(train_dataset))
+            global max_epochs
+            global steps_per_epoch
+            global max_lr
+            batch_size=64
+            max_epochs =200
+            max_lr = 55e-4
+            
+            train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
+            valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
+            
+            steps_per_epoch = math.ceil(len(train_loader) )
 
-    # Find checkpoint path
-    ckpt = None
-    log_path = f"./logs/sensorPT_empatica_{LOO}_finetune_tb"
-    for root, dirs, files in os.walk(log_path):
-        if 'checkpoints' in root and len(files) > 0:
-            ckpt = os.path.join(root, files[0])
-    print('CHECKPOINT:', ckpt)
+            if(l ==0):
+                # init model
+                model = LitSensorPT(ckptPATH=f"./logs/sensorPT_empatica_LOO1_tb/version_9/checkpoints/epoch=199-step=15400.ckpt")
+            
+                # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
+                lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
+                callbacks = [lr_monitor]
+            
+            
+                trainer = pl.Trainer(accelerator='cuda',
+                                     precision='16-mixed',
+                                     max_epochs=max_epochs, 
+                                     callbacks=callbacks,
+                                     enable_checkpointing=False,
+                                     logger=[pl_loggers.TensorBoardLogger('./logs/', name="test_tb", version=f"subject{LOO}"), 
+                                             pl_loggers.CSVLogger('./logs/', name="test_csv")])
+            
+                trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
     
-    ACCURACY = np.array([])
-    per_ACCURACY = np.array([])
-    rnd_ACCURACY = np.array([])
-    
-    global max_epochs
-    global steps_per_epoch
-    global max_lr
-    train_dataset, valid_dataset, test_dataset = get_leaveOneDatasetOut(test_path, train_path, 0, target_sample=256*2)
-    
-    batch_size=64
-    max_epochs =200
-    max_lr = 2e-4
-    
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
-    valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
-    
-    steps_per_epoch = math.ceil(len(train_loader) )
+            # predict
+            _, logit = model(test_dataset.x)
+            print('Y hat',torch.argmax(logit,  dim=-1))
+            # accuracy
+            y = test_dataset.y
+            #print('Y',y)
+            label = y.long()
+            accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
+            
+            print('accuracy',accuracy)
+            ACCURACY = np.append(ACCURACY,accuracy)
+            print(ACCURACY)
+            print('AVERAGE accuracy',np.mean(ACCURACY))
 
-    # init model
-    model = LitSensorPT(ckpt=ckpt)
-
-    # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
-    lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
-    callbacks = [lr_monitor]
-    
-    trainer = pl.Trainer(accelerator='cuda',
-                         precision='16-mixed',
-                         max_epochs=max_epochs, 
-                         callbacks=callbacks,
-                         enable_checkpointing=True,
-                         logger=[pl_loggers.TensorBoardLogger('./logs/', name="linear_prob_tb", version=f"lodo{LOO}"), 
-                                 pl_loggers.CSVLogger('./logs/', name="linear_prob_csv")])
-
-    trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
-
-    # predict
-    _, logit = model(test_dataset.x)
-    print('Y hat',torch.argmax(logit,  dim=-1))
-    # accuracy
-    y = test_dataset.y
-    print('Y test',y)
-    label = y.long()
-    accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
-    
-    print('accuracy',accuracy)
-    ACCURACY = np.append(ACCURACY,accuracy)
-    print(ACCURACY)
-    print('AVERAGE accuracy',np.mean(ACCURACY))
+        model_ACCURACY.append(ACCURACY.tolist())
+        print(model_ACCURACY)
+    #with open("./testfile.txt", "a") as file:
+    #    file.write(str(ACCURACY.tolist())+'\n')

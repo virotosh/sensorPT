@@ -13,7 +13,7 @@ import torch.nn.functional as F
 import random
 
 from util.utils_eval import get_metrics
-from util.loadSensor import get_data, get_Mydata, get_percent_Mydata, temporal_interpolation, get_Mydata_excludeFeature, get_leaveOneDatasetOut
+from util.loadSensor import get_data, get_Mydata, temporal_interpolation
 
 from model.SensorTransformer import SensorTransformerEncoder
 from model.module import Conv1dWithConstraint, LinearWithConstraint
@@ -22,24 +22,10 @@ seed_torch(7)
 
 class LitSensorPT(pl.LightningModule):
     
-    def __init__(self, ckpt):
+    def __init__(self, ckptPATH):
         super().__init__()    
 
-        #use_channels_names = ['S1_D1 hbo', 'S1_D1 hbr', 'S2_D1 hbo', 'S2_D1 hbr', 'S3_D1 hbo', 'S3_D1 hbr',
-        #             'S1_D2 hbo', 'S1_D2 hbr', 'S3_D2 hbo', 'S3_D2 hbr', 'S4_D2 hbo', 'S4_D2 hbr', 'S2_D3 hbo',
-        #             'S2_D3 hbr', 'S3_D3 hbo', 'S3_D3 hbr', 'S5_D3 hbo', 'S5_D3 hbr', 'S3_D4 hbo', 'S3_D4 hbr',
-        #             'S4_D4 hbo', 'S4_D4 hbr', 'S5_D4 hbo', 'S5_D4 hbr', 'S6_D5 hbo', 'S6_D5 hbr', 'S7_D5 hbo',
-        #             'S7_D5 hbr', 'S8_D5 hbo', 'S8_D5 hbr', 'S6_D6 hbo', 'S6_D6 hbr', 'S8_D6 hbo', 'S8_D6 hbr',
-        #             'S9_D6 hbo', 'S9_D6 hbr', 'S7_D7 hbo', 'S7_D7 hbr', 'S8_D7 hbo', 'S8_D7 hbr', 'S10_D7 hbo',
-        #             'S10_D7 hbr', 'S8_D8 hbo', 'S8_D8 hbr', 'S9_D8 hbo', 'S9_D8 hbr', 'S10_D8 hbo', 'S10_D8 hbr']
-        #use_channels_names = ['S2_D1 hbo', 'S3_D1 hbo', 'S1_D2 hbo', 'S3_D2 hbo',
-        #             'S4_D2 hbo', 'S3_D3 hbo', 'S5_D3 hbo', 'S3_D4 hbo', 'S4_D4 hbo', 'S5_D4 hbo', 'S6_D5 hbo', 'S8_D5 hbo', 'S6_D6 hbo',
-        #             'S8_D6 hbo', 'S9_D6 hbo', 'S8_D7 hbo', 'S7_D7 hbo', 'S8_D8 hbo', 'S9_D8 hbo', 'S10_D8 hbo', 'S2_D1 hbr', 'S3_D1 hbr',
-        #             'S1_D2 hbr', 'S3_D2 hbr', 'S4_D2 hbr', 'S3_D3 hbr', 'S5_D3 hbr', 'S3_D4 hbr', 'S4_D4 hbr', 'S5_D4 hbr', 'S6_D5 hbr',
-        #             'S8_D5 hbr', 'S6_D6 hbr', 'S8_D6 hbr', 'S9_D6 hbr', 'S8_D7 hbr', 'S7_D7 hbr', 'S8_D8 hbr', 'S9_D8 hbr', 'S10_D8 hbr']
         use_channels_names = ['ACC0','ACC1','ACC2','BVP','HR','EDA','TEMP']
-        #use_channels_names = ['EDA','HR','TEMP','EMG','Resp','EDA1','HR1','TEMP1','EMG1','Resp1',
-        #                        'EDA2','HR2','TEMP2','EMG2','Resp2']
         self.chans_num = len(use_channels_names)
         self.num_class = 2
 
@@ -64,7 +50,7 @@ class LitSensorPT(pl.LightningModule):
         
         # -- load checkpoint
         #load_path="./logs/sensor_large_1.ckpt"
-        load_path=ckpt
+        load_path=ckptPATH
         pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cuda"))
         
         target_encoder_stat = {}
@@ -80,7 +66,7 @@ class LitSensorPT(pl.LightningModule):
         self.linear_probe1   =   LinearWithConstraint(2048, 8, max_norm=1)
         self.linear_probe2   =   LinearWithConstraint(8*8, self.num_class, max_norm=0.25)
         
-        self.drop           = torch.nn.Dropout(p=0.4)
+        self.drop           = torch.nn.Dropout(p=0.2)
         
         self.loss_fn        = torch.nn.CrossEntropyLoss()
         self.running_scores = {"train":[], "valid":[], "test":[]}
@@ -163,10 +149,10 @@ class LitSensorPT(pl.LightningModule):
         # Logging to TensorBoard by default
         self.log('valid_loss', loss, on_epoch=True, on_step=False)
         self.log('valid_acc', accuracy, on_epoch=True, on_step=False)
-        
+
 #        self.running_scores["valid"].append((label.clone().detach().cpu(), logit.clone().detach().cpu()))
 #        return loss
-        
+
         y_score =  logit
         y_score =  torch.softmax(y_score, dim=-1)[:,1]
         self.running_scores["valid"].append((label.clone().detach().cpu(), y_score.clone().detach().cpu()))
@@ -194,67 +180,161 @@ class LitSensorPT(pl.LightningModule):
         return (
             {'optimizer': optimizer, 'lr_scheduler': lr_dict},
         )
-        
+
+
+from sklearn.metrics import precision_score, recall_score, confusion_matrix, roc_auc_score, cohen_kappa_score
+import itertools
 
 if __name__=="__main__":
-    LOO = 'LOO2'
-    # load data
-    test_path = f"/scratch/project_2014260/data/LOO_finetune/{LOO}/test"
-    train_path = f"/scratch/project_2014260/data/LOO_finetune/{LOO}/finetune"
+    data_accuracy = []
+    data_precision = []
+    data_kappa = []
+    data_specificity = []
+    data_auc = []
+    
+    LOO_list = [f'LOO{i}' for i in range(1, 13)]
+    
+    for loo in LOO_list:
+        # Load data
+        data_path = f"/scratch/project_2014260/data/LOO/{loo}/test"
+        subs = []
+        for root, dirs, files in os.walk(data_path):
+            subs = sorted(files)
+    
+        # Find checkpoint path
+        ckpt = None
+        log_path = f"./logs/sensorPT_empatica_{loo}_tb"
+        for root, dirs, files in os.walk(log_path):
+            if 'checkpoints' in root and len(files) > 0:
+                ckpt = os.path.join(root, files[0])
+    
+        print('CHECKPOINT:', ckpt)
+        loo_best_lrs = []
+        session_accuracies = np.array([])
+        session_precisions = np.array([])
+        session_kappas = np.array([])
+        session_specificities = np.array([])
+        session_aucs = np.array([])
+    
+        for subfile in subs[:5]:
+            print('-----', subfile)
+            global max_epochs
+            global steps_per_epoch
+            global max_lr
+            
+            train_dataset, valid_dataset, test_dataset = get_Mydata(subfile, data_path, 0, target_sample=512)
+            batch_size = 64
+            max_epochs = 200
+            lrs = list(itertools.product([1e-3,1e-4,2e-4,3e-4,4e-4,5e-4,5e-5,4e-5], [0.3,0.2]))
+            accs = []
+            precisions = []
+            kappas = []
+            specificities = []
+            aucs = []
+    
+            for lr in lrs:
+                print('Learning rate:', lr)
+                max_lr = lr[0]
+                train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
+                valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
+                
+                steps_per_epoch = math.ceil(len(train_loader))
+                model = LitSensorPT(ckptPATH=ckpt)
+                model.drop = torch.nn.Dropout(p=lr[1])
+                
+                lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
+                callbacks = [lr_monitor]
+    
+                trainer = pl.Trainer(
+                    accelerator='cuda',
+                    precision='16-mixed',
+                    max_epochs=max_epochs,
+                    callbacks=callbacks,
+                    enable_checkpointing=False,
+                    logger=[
+                        pl_loggers.TensorBoardLogger('./logs/', name="test_tb", version=f"subject{subfile}"),
+                        pl_loggers.CSVLogger('./logs/', name="test_csv")
+                    ]
+                )
+                trainer.fit(model, train_loader, valid_loader)
+    
+                # Prediction and Accuracy
+                _, logits = model(test_dataset.x)
+                y_true = test_dataset.y.long().cpu().numpy()
+                y_pred = torch.argmax(logits, dim=-1).cpu().numpy()
+                y_proba = logits.softmax(dim=-1).detach().numpy()
+    
+                # Accuracy
+                accuracy = (y_pred == y_true).mean()
+                precision = precision_score(y_true, y_pred, average='weighted')
+                kappa = cohen_kappa_score(y_true, y_pred)
+                cm = confusion_matrix(y_true, y_pred)
+                specificity = cm[0, 0] / (cm[0, 0] + cm[0, 1]) if (cm[0, 0] + cm[0, 1]) > 0 else 0
+                roc_auc = roc_auc_score(y_true, y_proba[:, 1])
+    
+                print('Y hat:', y_pred)
+                print('Accuracy:', accuracy)
+                print('Precision:', precision)
+                print('Kappa:', kappa)
+                print('Specificity:', specificity)
+                print('ROC AUC:', roc_auc)
+    
+                accs.append(accuracy)
+                precisions.append(precision)
+                kappas.append(kappa)
+                specificities.append(specificity)
+                aucs.append(roc_auc)
+    
+            # Use metrics from the best accuracy epoch
+            best_idx = np.argmax(accs)
+            loo_best_lrs.append(lrs[best_idx])
+    
+            session_accuracies = np.append(session_accuracies, accs[best_idx])
+            session_precisions = np.append(session_precisions, precisions[best_idx])
+            session_kappas = np.append(session_kappas, kappas[best_idx])
+            session_specificities = np.append(session_specificities, specificities[best_idx])
+            session_aucs = np.append(session_aucs, aucs[best_idx])
+    
+            print('Accuracies so far:', session_accuracies)
+            print('Average accuracy:', np.mean(session_accuracies))
+            print('Best learning rates:', loo_best_lrs)
+    
+        # Store average metrics for this LOO
+        data_accuracy.append(np.mean(session_accuracies))
+        data_precision.append(np.mean(session_precisions))
+        data_kappa.append(np.mean(session_kappas))
+        data_specificity.append(np.mean(session_specificities))
+        data_auc.append(np.mean(session_aucs))
+    
+        print(f'---METRICS for {loo}---')
+        print('Average Accuracy:', data_accuracy[-1])
+        print('Average Precision:', data_precision[-1])
+        print('Average Kappa:', data_kappa[-1])
+        print('Average Specificity:', data_specificity[-1])
+        print('Average AUC:', data_auc[-1])
+        print('--- ALL DATA SO FAR ---')
+        print('ALL Accuracies:', data_accuracy)
+        print('ALL Precisions:', data_precision)
+        print('ALL Kappa:', data_kappa)
+        print('ALL Specificities:', data_specificity)
+        print('ALL AUCs:', data_auc)
+        print('MEAN Accuracy:', np.mean(data_accuracy))
+        print('MEAN Kappa:', np.mean(data_kappa))
+        print('MEAN Precision:', np.mean(data_precision))
+        print('MEAN Specificity:', np.mean(data_specificity))
+        print('MEAN AUC:', np.nanmean(data_auc))
 
-    # Find checkpoint path
-    ckpt = None
-    log_path = f"./logs/sensorPT_empatica_{LOO}_finetune_tb"
-    for root, dirs, files in os.walk(log_path):
-        if 'checkpoints' in root and len(files) > 0:
-            ckpt = os.path.join(root, files[0])
-    print('CHECKPOINT:', ckpt)
+    results_df = pd.DataFrame({
+        'LOO': LOO_list,
+        'Accuracy': data_accuracy,
+        'Precision': data_precision,
+        'Kappa': data_kappa,
+        'Specificity': data_specificity,
+        'AUC': data_auc
+    })
     
-    ACCURACY = np.array([])
-    per_ACCURACY = np.array([])
-    rnd_ACCURACY = np.array([])
-    
-    global max_epochs
-    global steps_per_epoch
-    global max_lr
-    train_dataset, valid_dataset, test_dataset = get_leaveOneDatasetOut(test_path, train_path, 0, target_sample=256*2)
-    
-    batch_size=64
-    max_epochs =200
-    max_lr = 2e-4
-    
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
-    valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
-    
-    steps_per_epoch = math.ceil(len(train_loader) )
+    results_df.to_csv('louo_foundation_results.csv', index=False)
+    print("Results saved to louo_foundation_results.csv")
+    print(results_df)
 
-    # init model
-    model = LitSensorPT(ckpt=ckpt)
-
-    # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
-    lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
-    callbacks = [lr_monitor]
-    
-    trainer = pl.Trainer(accelerator='cuda',
-                         precision='16-mixed',
-                         max_epochs=max_epochs, 
-                         callbacks=callbacks,
-                         enable_checkpointing=True,
-                         logger=[pl_loggers.TensorBoardLogger('./logs/', name="linear_prob_tb", version=f"lodo{LOO}"), 
-                                 pl_loggers.CSVLogger('./logs/', name="linear_prob_csv")])
-
-    trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
-
-    # predict
-    _, logit = model(test_dataset.x)
-    print('Y hat',torch.argmax(logit,  dim=-1))
-    # accuracy
-    y = test_dataset.y
-    print('Y test',y)
-    label = y.long()
-    accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
-    
-    print('accuracy',accuracy)
-    ACCURACY = np.append(ACCURACY,accuracy)
-    print(ACCURACY)
-    print('AVERAGE accuracy',np.mean(ACCURACY))
+        

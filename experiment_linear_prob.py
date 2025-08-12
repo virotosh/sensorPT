@@ -12,7 +12,7 @@ import torch.nn.functional as F
 import random
 
 from util.utils_eval import get_metrics
-from util.loadSensor import get_data, get_IMWUTdata, temporal_interpolation, leave_one_user_out_IMWUTdata, per_user_IMWUTdata
+from util.loadSensor import get_data, get_Mydata, temporal_interpolation
 
 from model.SensorTransformer import SensorTransformerEncoder
 from model.module import Conv1dWithConstraint, LinearWithConstraint
@@ -197,28 +197,25 @@ class LitSensorPT(pl.LightningModule):
 
 if __name__=="__main__":
     # load data
-    data_path = "/projappl/project_2014260/data/wesadTest"
-    for root, dirs, files in os.walk("/projappl/project_2014260/data/wesadTest"):
+    data_path = f"/projappl/project_2014260/data/LOO/LOO1/test"
+    for root, dirs, files in os.walk(data_path):
         subs = sorted(files)
     #ckptID = sys.argv[1]
     model_ACCURACY = []
-    for ckptID in range(100,101):
+    for ckptID in range(1,12):
         print('CHECKPOINT:',f"/scratch/project_2014260/pretrained_full{ckptID}.ckpt")
         ACCURACY = np.array([])
         per_ACCURACY = np.array([])
         rnd_ACCURACY = np.array([])
         for i in subs:
             print('-----',i)
-            train_dataset,valid_dataset,test_dataset = get_IMWUTdata(i,data_path,0, target_sample=256*2, agument=False)
+            train_dataset,valid_dataset,test_dataset = get_Mydata(i,data_path,0, target_sample=256*2)
             global max_epochs
             global steps_per_epoch
             global max_lr
             batch_size=64
             max_epochs =200
-            max_lr = 45e-4
-            
-            #print(train_dataset.y)
-            #print(valid_dataset.y)
+            max_lr = 25e-4
             
             train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
             valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
@@ -237,8 +234,8 @@ if __name__=="__main__":
                                  max_epochs=max_epochs, 
                                  callbacks=callbacks,
                                  enable_checkpointing=False,
-                                 logger=[pl_loggers.TensorBoardLogger('./logs/', name="IMWUTtest_tb", version=f"subject{i}"), 
-                                         pl_loggers.CSVLogger('./logs/', name="IMWUTtest_csv")])
+                                 logger=[pl_loggers.TensorBoardLogger('./logs/', name="test_tb", version=f"subject{i}"), 
+                                         pl_loggers.CSVLogger('./logs/', name="test_csv")])
         
             trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
     
@@ -286,8 +283,8 @@ if __name__=="__main__":
                                  max_epochs=max_epochs, 
                                  callbacks=callbacks,
                                  enable_checkpointing=False,
-                                 logger=[pl_loggers.TensorBoardLogger('./logs/', name="IMWUTtest_tb", version=f"subject{i}"), 
-                                         pl_loggers.CSVLogger('./logs/', name="IMWUTtest_csv")])
+                                 logger=[pl_loggers.TensorBoardLogger('./logs/', name="test_tb", version=f"subject{i}"), 
+                                         pl_loggers.CSVLogger('./logs/', name="test_csv")])
         
             trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
     

@@ -19,24 +19,13 @@ def load_fn(x):
     x = x.to(torch.float)
     return x
 
+
 max_epochs = 200
 max_lr = 5e-4
 batch_size=64
 devices=[0]
 
-
-
-#train_dataset = torchvision.datasets.DatasetFolder(root="./data/merged_nemo/TrainFolder/", loader=load_fn,  extensions=['.edf'])
-#valid_dataset = torchvision.datasets.DatasetFolder(root="./data/merged_nemo/ValidFolder/", loader=load_fn, extensions=['.edf'])
-train_dataset = torchvision.datasets.DatasetFolder(root="/projappl/project_2014260/data/wesadFull/pretrain/TrainFolder/", loader=load_fn,  extensions=['.edf'])
-valid_dataset = torchvision.datasets.DatasetFolder(root="/projappl/project_2014260/data/wesadFull/pretrain/ValidFolder/", loader=load_fn, extensions=['.edf'])
-
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
-valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
-
-print(len(train_loader), len(valid_loader))
-
-steps_per_epoch = math.ceil(len(train_loader)/len(devices))
+steps_per_epoch = 100
 
 tag = "large"
 variant = "D"
