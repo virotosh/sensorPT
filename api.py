@@ -27,7 +27,7 @@ async def get_probs(request: Request):
     _, logit = model(test_dataset)
     probs = logit.detach().numpy()[0]
     probs_norm = (probs - probs.min()) / (probs - probs.min()).sum()
-    res = dict(zip(["left hand","right hand",'stress'], probs_norm[:-1]))
+    res = dict(zip(["left hand","right hand"], probs_norm[:-1]))
     
     return json.dumps(str(res))
 
