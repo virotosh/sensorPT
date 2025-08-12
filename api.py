@@ -1,5 +1,4 @@
 from linear_prob import LitSensorPT
-from util.loadEEG import get_data
 import torch
 import numpy as np
 
