@@ -34,7 +34,8 @@ async def get_probs(request: Request):
 if __name__=="__main__":
     
     import uvicorn
-
+    print('api intializing')
+    
     uvicorn.run(
         "api:app",
         host="0.0.0.0",

@@ -65,7 +65,7 @@ class LitSensorPT(pl.LightningModule):
         # -- load checkpoint
         #load_path="./logs/sensor_large_1.ckpt"
         load_path=ckpt
-        pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cuda"))
+        pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cpu"))
         
         target_encoder_stat = {}
         for k,v in pretrain_ckpt['state_dict'].items():
