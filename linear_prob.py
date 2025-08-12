@@ -22,7 +22,7 @@ seed_torch(7)
 
 class LitSensorPT(pl.LightningModule):
     
-    def __init__(self, ckpt):
+    def __init__(self, ckpt=f'./data/pretrained.ckpt'):
         super().__init__()    
 
         #use_channels_names = ['S1_D1 hbo', 'S1_D1 hbr', 'S2_D1 hbo', 'S2_D1 hbr', 'S3_D1 hbo', 'S3_D1 hbr',
