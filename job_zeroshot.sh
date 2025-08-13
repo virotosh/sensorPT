@@ -9,4 +9,4 @@
 #SBATCH --gres=gpu:v100:1
 
 source /projappl/project_2014260/mypythonproject/bin/activate
-srun python experiment_zeroshot.py
+srun python zeroshot.py

@@ -1200,6 +1200,10 @@ params = {"empatica":[[[ 4.70503159e+01,  4.77074585e+01,  4.91945992e+01,
          1.17903233e+01,  1.20274677e+01,  1.22674656e+01,
          1.24731808e+01,  1.30660362e+01,  1.32260361e+01,
          1.43046093e+01,  1.46531792e+01]]]}
-r=requests.post(url, json=params)
-print(r)
-print(r.json())
+
+import time
+for i in range(100000):
+    r=requests.post(url, json=params)
+    #print(r)
+    print(r.json())
+    time.sleep(1)

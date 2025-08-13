@@ -163,10 +163,10 @@ class LitSensorPT(pl.LightningModule):
         # Logging to TensorBoard by default
         self.log('valid_loss', loss, on_epoch=True, on_step=False)
         self.log('valid_acc', accuracy, on_epoch=True, on_step=False)
-        
+
 #        self.running_scores["valid"].append((label.clone().detach().cpu(), logit.clone().detach().cpu()))
 #        return loss
-        
+
         y_score =  logit
         y_score =  torch.softmax(y_score, dim=-1)[:,1]
         self.running_scores["valid"].append((label.clone().detach().cpu(), y_score.clone().detach().cpu()))
@@ -194,67 +194,92 @@ class LitSensorPT(pl.LightningModule):
         return (
             {'optimizer': optimizer, 'lr_scheduler': lr_dict},
         )
-        
+
 
 if __name__=="__main__":
-    LOO = 'LOO2'
-    # load data
-    test_path = f"/scratch/project_2014260/data/LOO_finetune/{LOO}/test"
-    train_path = f"/scratch/project_2014260/data/LOO_finetune/{LOO}/finetune"
-
-    # Find checkpoint path
-    ckpt = None
-    log_path = f"./logs/sensorPT_empatica_{LOO}_finetune_tb"
-    for root, dirs, files in os.walk(log_path):
-        if 'checkpoints' in root and len(files) > 0:
-            ckpt = os.path.join(root, files[0])
-    print('CHECKPOINT:', ckpt)
+    LOOs = ['LOO1','LOO2','LOO3','LOO4','LOO5','LOO6','LOO7','LOO8','LOO9','LOO10','LOO11','LOO12']
+    for LOO in LOOs:
+        # load data
+        test_path = f"/scratch/project_2014260/data/LOO_finetune/{LOO}/test"
+        train_path = f"/scratch/project_2014260/data/LOO_finetune/{LOO}/finetune"
     
-    ACCURACY = np.array([])
-    per_ACCURACY = np.array([])
-    rnd_ACCURACY = np.array([])
+        # Find checkpoint path
+        ckpt = None
+        log_path = f"./logs/sensorPT_empatica_{LOO}_finetune_tb"
+        for root, dirs, files in os.walk(log_path):
+            if 'checkpoints' in root and len(files) > 0:
+                ckpt = os.path.join(root, files[0])
+        print('CHECKPOINT:', ckpt)
+        
+        ACCURACY = np.array([])
+        per_ACCURACY = np.array([])
+        rnd_ACCURACY = np.array([])
+        
+        global max_epochs
+        global steps_per_epoch
+        global max_lr
+        train_dataset, valid_dataset, test_dataset = get_leaveOneDatasetOut(test_path, train_path, 0, target_sample=256*2)
     
-    global max_epochs
-    global steps_per_epoch
-    global max_lr
-    train_dataset, valid_dataset, test_dataset = get_leaveOneDatasetOut(test_path, train_path, 0, target_sample=256*2)
+        # init model
+        use_channels_names = ['ACC0','ACC1','ACC2','BVP','HR','EDA','TEMP']
+        chans_num = len(use_channels_names)
+        num_class = 2
+        target_encoder = SensorTransformerEncoder(
+            img_size=[len(use_channels_names), 256*2],
+            patch_size=64,
+            embed_num=4,
+            embed_dim=512,
+            depth=8,
+            num_heads=8,
+            mlp_ratio=4.0,
+            drop_rate=0.0,
+            attn_drop_rate=0.0,
+            drop_path_rate=0.0,
+            init_std=0.02,
+            qkv_bias=True, 
+            norm_layer=partial(nn.LayerNorm, eps=1e-6))
+            
+        chans_id = target_encoder.prepare_chan_ids(use_channels_names)
+        
+        load_path=ckpt
+        pretrain_ckpt = torch.load(load_path, weights_only=False, map_location=torch.device("cpu")) # gpu when needed
+        
+        target_encoder_stat = {}
+        for k,v in pretrain_ckpt['state_dict'].items():
+            if k.startswith("target_encoder."):
+                target_encoder_stat[k[15:]]=v
+        
+                
+        target_encoder.load_state_dict(target_encoder_stat)
+        
+        #x, y = batch
+        #label = y.long()
+        from sklearn.metrics.pairwise import cosine_similarity
+        #x, logit = self.forward(x)
+        chan_conv = Conv1dWithConstraint(chans_num, chans_num, 1, max_norm=1)
+        
+        x0 = chan_conv(train_dataset.x)
+        z0 = target_encoder(x0, chans_id.to(x0))
+        h0 = z0.flatten(1).detach().numpy()
+        h0_norm = np.linalg.norm(h0, axis=1)
+        
+        print('begin', LOO)
+        ytrain = train_dataset.y.detach().numpy()
+        ytest = test_dataset.y.detach().numpy()
+        yhat = []
+        yidx = int(len(ytest))
+        print(yidx)
+        for e in range(yidx):
+            x1 = chan_conv(test_dataset.x[e:e+1,:])
+            z1 = target_encoder(x1, chans_id.to(x1))
+            h1 = z1.flatten(1).detach().numpy()[0]
+            h1_norm = np.linalg.norm(h1)
+            myx = (h0 @ h1) / (h0_norm * h1_norm)
+            #print(np.argsort(-myx)[0])
+            #print(ytest[np.argsort(-myx)[0]])
+            #yhat.append(ytrain[np.argsort(-myx)[0]])
+            yhat.append(1 if np.sum(ytest[np.argsort(-myx)[:10]])>5 else 0)
+        #print(yhat)
+        #print(ytest[:yidx])
+        print((np.array(yhat) == np.array(ytest[:yidx])).mean())
     
-    batch_size=64
-    max_epochs =200
-    max_lr = 2e-4
-    
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=0, shuffle=True)
-    valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=batch_size, num_workers=0, shuffle=False)
-    
-    steps_per_epoch = math.ceil(len(train_loader) )
-
-    # init model
-    model = LitSensorPT(ckpt=ckpt)
-
-    # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
-    lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='epoch')
-    callbacks = [lr_monitor]
-    
-    trainer = pl.Trainer(accelerator='cuda',
-                         precision='16-mixed',
-                         max_epochs=max_epochs, 
-                         callbacks=callbacks,
-                         enable_checkpointing=True,
-                         logger=[pl_loggers.TensorBoardLogger('./logs/', name="linear_prob_tb", version=f"lodo{LOO}"), 
-                                 pl_loggers.CSVLogger('./logs/', name="linear_prob_csv")])
-
-    trainer.fit(model, train_loader, valid_loader, ckpt_path='last')
-
-    # predict
-    _, logit = model(test_dataset.x)
-    print('Y hat',torch.argmax(logit,  dim=-1))
-    # accuracy
-    y = test_dataset.y
-    print('Y test',y)
-    label = y.long()
-    accuracy = ((torch.argmax(logit, dim=-1)==label)*1.0).mean()
-    
-    print('accuracy',accuracy)
-    ACCURACY = np.append(ACCURACY,accuracy)
-    print(ACCURACY)
-    print('AVERAGE accuracy',np.mean(ACCURACY))
