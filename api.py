@@ -5,10 +5,22 @@ import numpy as np
 import os
 import json
 from typing import Dict, List, Union, Any
-from fastapi import FastAPI, Request
 from sklearn import preprocessing
 
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+
+
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # init model
 ckpt_path = './data/epoch=199-step=3400.ckpt'
@@ -35,7 +47,7 @@ async def get_probs(request: Request):
 
 if __name__=="__main__":
     
-    import uvicorn
+    
     print('api intializing')
     
     uvicorn.run(
